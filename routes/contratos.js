@@ -1,24 +1,22 @@
+// contratos.js
 const express = require('express');
 const router = express.Router();
-const { MongoClient, ObjectId } = require('mongodb'); // Importando ObjectId
+const connection = require('../bd'); // Importa a conexão do MySQL
 
-// Obtendo a referência ao banco de dados a partir do app.locals
-const db = require('../server').db; // Ajuste o caminho se necessário
-
-// Rota para obter detalhes do contrato
-router.get('/getContratos', async (req, res) => {
-  try {
-    const collection = db.collection('contratos'); // Substitua 'contratos' pelo nome da sua coleção
-    const contratos = await collection.find({}).toArray();
-    res.status(200).json({ success: true, contratos });
-  } catch (error) {
-    console.error('Erro ao obter contratos:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
-  }
+// Rota para obter detalhes dos contratos
+router.get('/getContratos', (req, res) => {
+  connection.query('SELECT * FROM contratos', (err, results) => {
+    if (err) {
+      console.error('Erro ao obter contratos:', err);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+      return;
+    }
+    res.status(200).json({ success: true, contratos: results });
+  });
 });
 
 // Rota para salvar um novo contrato
-router.post('/salvarContrato', async (req, res) => {
+router.post('/salvarContrato', (req, res) => {
   const {
     processoAno,
     numeroContrato,
@@ -34,9 +32,8 @@ router.post('/salvarContrato', async (req, res) => {
     secretarias,
   } = req.body;
 
-  try {
-    const collection = db.collection('contratos'); // Substitua 'contratos' pelo nome da sua coleção
-    const result = await collection.insertOne({
+  const sql = `
+    INSERT INTO contratos (
       processoAno,
       numeroContrato,
       modalidade,
@@ -48,33 +45,52 @@ router.post('/salvarContrato', async (req, res) => {
       dataInicio,
       dataFinalizacao,
       objetoContrato,
-      secretarias,
-    });
+      secretarias
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
 
-    res.status(201).json({ success: true, contratoId: result.insertedId });
-  } catch (error) {
-    console.error('Erro ao salvar contrato:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
-  }
+  const values = [
+    processoAno,
+    numeroContrato,
+    modalidade,
+    registro,
+    orgao,
+    cnpjContratante,
+    valorContratado,
+    dataAssinatura,
+    dataInicio,
+    dataFinalizacao,
+    objetoContrato,
+    secretarias,
+  ];
+
+  connection.query(sql, values, (err, result) => {
+    if (err) {
+      console.error('Erro ao salvar contrato:', err);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+      return;
+    }
+    res.status(201).json({ success: true, contratoId: result.insertId });
+  });
 });
 
 // Rota para excluir um contrato
-router.delete('/excluirContrato/:id', async (req, res) => {
+router.delete('/excluirContrato/:id', (req, res) => {
   const id = req.params.id;
 
-  try {
-    const collection = db.collection('contratos'); // Substitua 'contratos' pelo nome da sua coleção
-    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+  connection.query('DELETE FROM contratos WHERE id = ?', [id], (err, result) => {
+    if (err) {
+      console.error('Erro ao excluir contrato:', err);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+      return;
+    }
 
-    if (result.deletedCount > 0) {
+    if (result.affectedRows > 0) {
       res.status(200).json({ success: true });
     } else {
       res.status(404).json({ error: 'Contrato não encontrado' });
     }
-  } catch (error) {
-    console.error('Erro ao excluir contrato:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
-  }
+  });
 });
 
 module.exports = router;

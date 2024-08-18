@@ -1,23 +1,20 @@
-const { MongoClient } = require('mongodb');
+// bd.js
+const mysql = require('mysql2');
 
-// String de conexão do MongoDB Atlas com suas credenciais
-const uri = 'mongodb+srv://andersonlourencor:MJhRbHW1M74sDfO0@voxbd.fjnre.mongodb.net/?retryWrites=true&w=majority&appName=VoxBD';
-
-const client = new MongoClient(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+// Configurações de conexão MySQL
+const connection = mysql.createConnection({
+  host: 'vox.c34okqo2iv4k.us-east-1.rds.amazonaws.com', // Substitua pelo seu endpoint da AWS
+  user: 'dersonls', // Substitua pelo seu usuário do MySQL
+  password: 'Lara795816', // Substitua pela sua senha do MySQL
+  database: 'gerenciador' // Substitua pelo nome do seu banco de dados
 });
 
-async function connect() {
-  try {
-    await client.connect();
-    console.log('Conexão com o MongoDB Atlas estabelecida com sucesso!');
-  } catch (err) {
-    console.error('Erro ao conectar ao MongoDB Atlas:', err);
+connection.connect((err) => {
+  if (err) {
+    console.error('Erro ao conectar ao MySQL:', err);
+    return;
   }
-}
+  console.log('Conectado ao banco de dados MySQL com sucesso!');
+});
 
-connect();
-
-// Exportar o cliente para ser usado em outros arquivos
-module.exports = client;
+module.exports = connection;
