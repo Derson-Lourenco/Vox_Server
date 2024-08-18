@@ -22,7 +22,11 @@ connection.connect((err) => {
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.use(cors());
+// Configuração do CORS
+app.use(cors({
+  origin: 'https://voxserver.netlify.app', // Substitua com o URL do seu frontend
+}));
+
 app.use(express.json());
 
 // Middleware para registrar solicitações
@@ -33,8 +37,6 @@ app.use((req, res, next) => {
 
 // Definindo rotas diretamente aqui
 app.use('/contratos', (req, res) => {
-  // Exemplo de rota para '/contratos'
-  // Substitua o código abaixo pelo que você precisa
   if (req.method === 'GET') {
     connection.query('SELECT * FROM contratos', (err, results) => {
       if (err) {
@@ -42,6 +44,9 @@ app.use('/contratos', (req, res) => {
       }
       res.json(results);
     });
+  } else if (req.method === 'POST') {
+    // Adicione a lógica para POST, se necessário
+    res.status(200).json({ message: 'Contrato criado com sucesso!' });
   } else {
     res.status(405).json({ error: 'Método não permitido' });
   }
