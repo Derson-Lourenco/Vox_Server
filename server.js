@@ -1,6 +1,6 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const connection = require('./bd'); // Importa a conexão do MySQL
 const routes = require('./routes/contratos');
 
@@ -18,6 +18,11 @@ app.use((req, res, next) => {
 
 // Roteamento
 app.use('/contratos', routes);
+
+// Endpoint de verificação de saúde
+app.get('/health', (req, res) => {
+  res.sendFile(path.join(__dirname, 'health.html'));
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
