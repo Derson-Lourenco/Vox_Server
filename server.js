@@ -1,21 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient } = require('mongodb');
-const routes = require('./routes/contratos');
+const routes = require('./routes/contratos'); // Verifique se o caminho está correto
 
 const app = express();
-const port = process.env.PORT || 3001;
-// const port = 5000;
+const port = 5000;
 
-// String de conexão do MongoDB Atlas com suas credenciais
-const uri = 'mongodb+srv://andersonlourencor:MJhRbHW1M74sDfO0@voxbd.fjnre.mongodb.net/?retryWrites=true&w=majority&appName=VoxBD';
-
+const uri = process.env.MONGODB_URI; // Usa a variável de ambiente para o URI do MongoDB
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
-// Middleware para registrar solicitações
 app.use((req, res, next) => {
   console.log(`Recebida solicitação: ${req.method} ${req.url}`);
   next();
