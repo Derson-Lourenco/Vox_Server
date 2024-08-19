@@ -1,7 +1,20 @@
-// contratos.js
 const express = require('express');
 const router = express.Router();
-const connection = require('../bd'); // Importa a conexão do MySQL
+const mysql = require('mysql2');
+
+// Configurações de conexão MySQL
+const connection = mysql.createConnection({
+  host: 'vox.c34okqo2iv4k.us-east-1.rds.amazonaws.com',
+  user: 'dersonls',
+  password: 'Lara795816',
+  database: 'gerenciador'
+});
+
+connection.connect((err) => {
+  if (err) {
+    console.error('Erro ao conectar ao MySQL:', err);
+  }
+});
 
 // Rota para obter detalhes dos contratos
 router.get('/getContratos', (req, res) => {
@@ -46,7 +59,7 @@ router.post('/salvarContrato', (req, res) => {
       dataFinalizacao,
       objetoContrato,
       secretarias
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [

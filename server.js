@@ -3,12 +3,16 @@ const cors = require('cors');
 const path = require('path');
 const mysql = require('mysql2');
 
+const app = express();
+const port = process.env.PORT || 5000;
+// const port = 5000;
+
 // Configurações de conexão MySQL
 const connection = mysql.createConnection({
-  host: 'vox.c34okqo2iv4k.us-east-1.rds.amazonaws.com', // Substitua pelo seu endpoint da AWS
-  user: 'dersonls', // Substitua pelo seu usuário do MySQL
-  password: 'Lara795816', // Substitua pela sua senha do MySQL
-  database: 'gerenciador' // Substitua pelo nome do seu banco de dados
+  host: process.env.DB_HOST || 'vox.c34okqo2iv4k.us-east-1.rds.amazonaws.com',
+  user: process.env.DB_USER || 'dersonls',
+  password: process.env.DB_PASSWORD || 'Lara795816',
+  database: process.env.DB_NAME || 'gerenciador'
 });
 
 connection.connect((err) => {
@@ -19,12 +23,13 @@ connection.connect((err) => {
   console.log('Conectado ao banco de dados MySQL com sucesso!');
 });
 
-const app = express();
-const port = process.env.PORT || 3001;
-
 // Configuração do CORS
+// app.use(cors({
+//   origin: ['http://localhost:3000'], // Permitir o frontend acessar o backend
+// }));
+
 app.use(cors({
-  origin: 'https://voxserver.netlify.app', // Substitua com o URL do seu frontend
+  origin: ['https://main--voxgerenciador.netlify.app'], // Permitir o frontend acessar o backend
 }));
 
 app.use(express.json());
@@ -35,27 +40,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Definindo rotas diretamente aqui
-app.use('/contratos', (req, res) => {
-  if (req.method === 'GET') {
-    connection.query('SELECT * FROM contratos', (err, results) => {
-      if (err) {
-        return res.status(500).json({ error: 'Erro ao consultar contratos' });
-      }
-      res.json(results);
-    });
-  } else if (req.method === 'POST') {
-    // Adicione a lógica para POST, se necessário
-    res.status(200).json({ message: 'Contrato criado com sucesso!' });
-  } else {
-    res.status(405).json({ error: 'Método não permitido' });
-  }
-});
-
-// Endpoint de verificação de saúde
-app.get('/health', (req, res) => {
-  res.sendFile(path.join(__dirname, 'health.html'));
-});
+// Importa e usa as rotas definidas em contratos.js
+const contratosRouter = require('./routes/contratos');
+app.use('/contratos', contratosRouter); // Caminho correto para a rota
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
