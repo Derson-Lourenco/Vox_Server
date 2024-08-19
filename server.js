@@ -27,6 +27,11 @@ app.use(cors({
   origin: ['https://main--voxgerenciador.netlify.app'],
 }));
 
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy", "default-src 'self'; style-src 'self' https://www.gstatic.com");
+  next();
+});
+
 app.use(express.json());
 
 // Middleware para registrar solicitações
