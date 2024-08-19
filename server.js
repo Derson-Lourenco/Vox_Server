@@ -5,7 +5,6 @@ const mysql = require('mysql2');
 
 const app = express();
 const port = process.env.PORT || 5000;
-// const port = 5000;
 
 // Configurações de conexão MySQL
 const connection = mysql.createConnection({
@@ -24,12 +23,8 @@ connection.connect((err) => {
 });
 
 // Configuração do CORS
-// app.use(cors({
-//   origin: ['http://localhost:3000'], // Permitir o frontend acessar o backend
-// }));
-
 app.use(cors({
-  origin: ['https://main--voxgerenciador.netlify.app'], // Permitir o frontend acessar o backend
+  origin: ['https://main--voxgerenciador.netlify.app'],
 }));
 
 app.use(express.json());
@@ -41,8 +36,8 @@ app.use((req, res, next) => {
 });
 
 // Importa e usa as rotas definidas em contratos.js
-const contratosRouter = require('./routes/contratos');
-app.use('/contratos', contratosRouter); // Caminho correto para a rota
+const contratosRouter = require('./routes/contratos')(connection); // Passe a conexão como argumento
+app.use('/contratos', contratosRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
