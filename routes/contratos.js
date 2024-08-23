@@ -93,5 +93,72 @@ module.exports = (connection) => {
     });
   });
 
+  // Rota para atualizar um contrato
+  router.put('/atualizarContrato/:id', (req, res) => {
+    const id = req.params.id;
+    const {
+      processoAno,
+      numeroContrato,
+      modalidade,
+      registro,
+      orgao,
+      cnpjContratante,
+      valorContratado,
+      dataAssinatura,
+      dataInicio,
+      dataFinalizacao,
+      objetoContrato,
+      secretarias,
+    } = req.body;
+
+    const sql = `
+      UPDATE contratos
+      SET
+        processoAno = ?,
+        numeroContrato = ?,
+        modalidade = ?,
+        registro = ?,
+        orgao = ?,
+        cnpjContratante = ?,
+        valorContratado = ?,
+        dataAssinatura = ?,
+        dataInicio = ?,
+        dataFinalizacao = ?,
+        objetoContrato = ?,
+        secretarias = ?
+      WHERE id = ?
+    `;
+
+    const values = [
+      processoAno,
+      numeroContrato,
+      modalidade,
+      registro,
+      orgao,
+      cnpjContratante,
+      valorContratado,
+      dataAssinatura,
+      dataInicio,
+      dataFinalizacao,
+      objetoContrato,
+      secretarias,
+      id
+    ];
+
+    connection.query(sql, values, (err, result) => {
+      if (err) {
+        console.error('Erro ao atualizar contrato:', err);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+        return;
+      }
+
+      if (result.affectedRows > 0) {
+        res.status(200).json({ success: true });
+      } else {
+        res.status(404).json({ error: 'Contrato não encontrado' });
+      }
+    });
+  });
+
   return router;
 };
