@@ -60,12 +60,24 @@ app.get('/api/licitacoes/:idUnidadeGestora/:esfera/:data', async (req, res) => {
         ascDesc
       }
     });
-    res.json(response.data.licitacoes);
+
+    console.log('Dados recebidos do TCE-PI:', response.data);
+
+    // Verifica se a resposta contém a chave 'licitacoes' e é um array
+    if (response.data && Array.isArray(response.data.licitacoes)) {
+      res.json(response.data.licitacoes);
+    } else {
+      console.error('Resposta da API não contém a chave "licitacoes" ou não é um array.');
+      res.status(500).json({ error: 'Resposta da API não contém a chave "licitacoes" ou não é um array.' });
+    }
   } catch (error) {
-    console.error('Erro ao consumir a API do TCE-PI:', error);
+    console.error('Erro ao consumir a API do TCE-PI:', error.message);
     res.status(500).json({ error: 'Erro ao buscar licitações' });
   }
 });
+
+
+
 
 // Importa e usa as rotas definidas em contratos.js
 const contratosRouter = require('./routes/contratos')(connection);
