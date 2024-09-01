@@ -49,10 +49,16 @@ app.get('/api/licitacoes/:idUnidadeGestora/:esfera/:data', async (req, res) => {
   const { idUnidadeGestora, esfera, data } = req.params;
   const { pagina = 1, qtdePorPagina = 10, campoOrdenacao = null, ascDesc = 0 } = req.query;
 
+  console.log('Parâmetros recebidos:', { idUnidadeGestora, esfera, data, pagina, qtdePorPagina, campoOrdenacao, ascDesc });
+
   try {
-    const url = `http://sistemas.tce.pi.gov.br/api/portaldacidadania/licitacoes/${idUnidadeGestora}/${esfera}/${data}`;
+    const url = `http://sistemas.tce.pi.gov.br/api/portaldacidadania/licitacoes/${idUnidadeGestora}`;
+    console.log('URL da requisição para a API do TCE-PI:', url);
+
     const response = await axios.get(url, {
       params: {
+        esfera,
+        data,
         pagina,
         qtdePorPagina,
         campoOrdenacao,
@@ -60,9 +66,8 @@ app.get('/api/licitacoes/:idUnidadeGestora/:esfera/:data', async (req, res) => {
       }
     });
 
-    console.log('Dados recebidos do TCE-PI:', response.data);
+    console.log('Resposta da API do TCE-PI:', response.data);
 
-    // Verifica se a resposta contém a chave 'licitacoes' e é um array
     if (response.data && Array.isArray(response.data.licitacoes)) {
       res.json(response.data.licitacoes);
     } else {
@@ -71,9 +76,11 @@ app.get('/api/licitacoes/:idUnidadeGestora/:esfera/:data', async (req, res) => {
     }
   } catch (error) {
     console.error('Erro ao consumir a API do TCE-PI:', error.message);
-    res.status(500).json({ error: 'Erro ao buscar licitações' });
+    console.error('Detalhes do erro:', error.response ? error.response.data : error.message);
+    res.status(500).json({ error: 'Erro ao buscar licitações', message: error.message });
   }
 });
+
 
 // Importa e usa as rotas definidas em contratos.js
 const contratosRouter = require('./routes/contratos')(connection);
