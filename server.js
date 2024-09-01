@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const mysql = require('mysql2');
+const axios = require('axios');  // Adicione o axios para fazer a requisição à API do TCE
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -44,8 +45,30 @@ app.use((req, res, next) => {
   next();
 });
 
+// Nova rota para consumir a API do TCE-PI
+app.get('/api/licitacoes/:idUnidadeGestora/:esfera/:data', async (req, res) => {
+  const { idUnidadeGestora, esfera, data } = req.params;
+  const { pagina = 1, qtdePorPagina = 10, campoOrdenacao = null, ascDesc = 0 } = req.query;
+
+  try {
+    const url = `http://sistemas.tce.pi.gov.br/api/portaldacidadania/licitacoes/${idUnidadeGestora}/${esfera}/${data}`;
+    const response = await axios.get(url, {
+      params: {
+        pagina,
+        qtdePorPagina,
+        campoOrdenacao,
+        ascDesc
+      }
+    });
+    res.json(response.data.licitacoes);
+  } catch (error) {
+    console.error('Erro ao consumir a API do TCE-PI:', error);
+    res.status(500).json({ error: 'Erro ao buscar licitações' });
+  }
+});
+
 // Importa e usa as rotas definidas em contratos.js
-const contratosRouter = require('./routes/contratos')(connection); // Passe a conexão como argumento
+const contratosRouter = require('./routes/contratos')(connection);
 app.use('/contratos', contratosRouter);
 
 app.listen(port, () => {
