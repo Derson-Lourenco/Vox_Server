@@ -25,7 +25,7 @@ connection.connect((err) => {
 // Configuração do CORS
 const corsOptions = {
   origin: [
-    'https://main--voxgerenciador.netlify.app', // URL de produção
+    'https://voxgerenciador.netlify.app', // URL de produção
     'http://localhost:3000' // URL do frontend local
   ]
 };
