@@ -2,9 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
 const axios = require('axios');  // Adicione o axios para fazer a requisição à API do TCE
+const express = require('express');
 
 const app = express();
 const port = process.env.PORT || 5000;
+
 
 // Configurações de conexão MySQL
 const connection = mysql.createConnection({
@@ -45,41 +47,47 @@ app.use((req, res, next) => {
 });
 
 // Nova rota para consumir a API do TCE-PI
-app.get('/api/licitacoes/:idUnidadeGestora/:esfera/:data', async (req, res) => {
-  const { idUnidadeGestora, esfera, data } = req.params;
-  const { pagina = 1, qtdePorPagina = 10, campoOrdenacao = null, ascDesc = 0 } = req.query;
 
-  console.log('Parâmetros recebidos:', { idUnidadeGestora, esfera, data, pagina, qtdePorPagina, campoOrdenacao, ascDesc });
+app.use(express.json());
 
+// Lista fixa de IDs predefinidos
+const idsPredefinidos = ['127', '129']; // Adicione os IDs que você deseja
+
+// Rota unificada para buscar as licitações e seus detalhes com IDs fixos
+app.get('/api/licitacoes-com-detalhes', async (req, res) => {
   try {
-    const url = `http://sistemas.tce.pi.gov.br/api/portaldacidadania/licitacoes/${idUnidadeGestora}`;
-    console.log('URL da requisição para a API do TCE-PI:', url);
-
-    const response = await axios.get(url, {
-      params: {
-        esfera,
-        data,
-        pagina,
-        qtdePorPagina,
-        campoOrdenacao,
-        ascDesc
-      }
+    // 1. Obter as licitações para cada ID predefinido
+    const licitacoesPromises = idsPredefinidos.map(async (idUnidadeGestora) => {
+      const licitacoesResponse = await axios.get(`https://sistemas.tce.pi.gov.br/api/portaldacidadania/licitacoes/${idUnidadeGestora}`);
+      return { idUnidadeGestora, licitacoes: licitacoesResponse.data };
     });
 
-    console.log('Resposta da API do TCE-PI:', response.data);
+    const licitacoesResults = await Promise.all(licitacoesPromises);
 
-    if (response.data && Array.isArray(response.data.licitacoes)) {
-      res.json(response.data.licitacoes);
-    } else {
-      console.error('Resposta da API não contém a chave "licitacoes" ou não é um array.');
-      res.status(500).json({ error: 'Resposta da API não contém a chave "licitacoes" ou não é um array.' });
-    }
+    // 2. Buscar detalhes para cada licitação
+    const detalhesPromises = licitacoesResults.flatMap(({ idUnidadeGestora, licitacoes }) => 
+      licitacoes.map(async (licitacao) => {
+        const formattedDate = licitacao.data.split('T')[0].replace(/-/g, ''); // Formatar data para AAAAMMDD
+        const detalhesResponse = await axios.get(`https://sistemas.tce.pi.gov.br/api/portaldacidadania/licitacoes/${idUnidadeGestora}/1/${formattedDate}`);
+        return detalhesResponse.data;
+      })
+    );
+
+    const detalhesArray = await Promise.all(detalhesPromises);
+    const detalhesFlattened = detalhesArray.flat();
+
+    // Retornar os dados combinados
+    res.json(detalhesFlattened);
   } catch (error) {
-    console.error('Erro ao consumir a API do TCE-PI:', error.message);
-    console.error('Detalhes do erro:', error.response ? error.response.data : error.message);
-    res.status(500).json({ error: 'Erro ao buscar licitações', message: error.message });
+    console.error('Erro ao buscar dados:', error.message);
+    res.status(500).json({ error: 'Erro ao buscar dados.' });
   }
 });
+
+// app.listen(port, () => {
+//   console.log(`API rodando em http://localhost:${port}`);
+// });
+
 
 
 // Importa e usa as rotas definidas em contratos.js
