@@ -51,10 +51,11 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 // Lista fixa de IDs predefinidos
-const idsPredefinidos = ['127', '129']; // Adicione os IDs que você deseja
 
 // Rota unificada para buscar as licitações e seus detalhes com IDs fixos
 app.get('/api/licitacoes-com-detalhes', async (req, res) => {
+  
+  const idsPredefinidos = ['127', '129']; // Adicione os IDs que você deseja
   try {
     // 1. Obter as licitações para cada ID predefinido
     const licitacoesPromises = idsPredefinidos.map(async (idUnidadeGestora) => {
