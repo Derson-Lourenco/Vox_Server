@@ -2,11 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
 const axios = require('axios');  // Adicione o axios para fazer a requisição à API do TCE
-const express = require('express');
 
 const app = express();
 const port = process.env.PORT || 5000;
-
 
 // Configurações de conexão MySQL
 const connection = mysql.createConnection({
@@ -46,55 +44,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Nova rota para consumir a API do TCE-PI
-
-app.use(express.json());
-
-// Lista fixa de IDs predefinidos
-
-// Rota unificada para buscar as licitações e seus detalhes com IDs fixos
-app.get('/api/licitacoes-com-detalhes', async (req, res) => {
-  
-  const idsPredefinidos = ['127', '129']; // Adicione os IDs que você deseja
-  try {
-    // 1. Obter as licitações para cada ID predefinido
-    const licitacoesPromises = idsPredefinidos.map(async (idUnidadeGestora) => {
-      const licitacoesResponse = await axios.get(`https://sistemas.tce.pi.gov.br/api/portaldacidadania/licitacoes/${idUnidadeGestora}`);
-      return { idUnidadeGestora, licitacoes: licitacoesResponse.data };
-    });
-
-    const licitacoesResults = await Promise.all(licitacoesPromises);
-
-    // 2. Buscar detalhes para cada licitação
-    const detalhesPromises = licitacoesResults.flatMap(({ idUnidadeGestora, licitacoes }) => 
-      licitacoes.map(async (licitacao) => {
-        const formattedDate = licitacao.data.split('T')[0].replace(/-/g, ''); // Formatar data para AAAAMMDD
-        const detalhesResponse = await axios.get(`https://sistemas.tce.pi.gov.br/api/portaldacidadania/licitacoes/${idUnidadeGestora}/1/${formattedDate}`);
-        return detalhesResponse.data;
-      })
-    );
-
-    const detalhesArray = await Promise.all(detalhesPromises);
-    const detalhesFlattened = detalhesArray.flat();
-
-    // Retornar os dados combinados
-    res.json(detalhesFlattened);
-  } catch (error) {
-    console.error('Erro ao buscar dados:', error.message);
-    res.status(500).json({ error: 'Erro ao buscar dados.' });
-  }
-});
-
-// app.listen(port, () => {
-//   console.log(`API rodando em http://localhost:${port}`);
-// });
-
-
-
 // Importa e usa as rotas definidas em contratos.js
 const contratosRouter = require('./routes/contratos')(connection);
 app.use('/contratos', contratosRouter);
 
+// Importa e usa as rotas definidas em licitacoes.js
+const licitacoesRouter = require('./routes/licitacoes')(connection);
+app.use('/licitacoes', licitacoesRouter);
+
+// Inicia o servidor
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
