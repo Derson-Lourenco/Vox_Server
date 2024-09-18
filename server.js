@@ -52,6 +52,8 @@ app.use('/contratos', contratosRouter);
 const licitacoesRouter = require('./routes/licitacoes')(connection);
 app.use('/licitacoes', licitacoesRouter);
 
+const clientesRouter = require('./routes/clientes')(connection);
+app.use('/clientes', clientesRouter);
 // Inicia o servidor
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
