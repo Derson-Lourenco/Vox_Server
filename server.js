@@ -25,11 +25,14 @@ connection.connect((err) => {
 // Configuração do CORS
 const corsOptions = {
   origin: [
-    'https://voxgerenciador.netlify.app', // URL de produção
+    'https://voxgerenciador.netlify.app', // URL do frontend em produção
     'http://localhost:3000' // URL do frontend local
-  ]
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
+
 
 app.use((req, res, next) => {
   res.setHeader("Content-Security-Policy", "default-src 'self'; style-src 'self' https://www.gstatic.com");
