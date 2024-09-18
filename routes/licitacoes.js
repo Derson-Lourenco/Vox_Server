@@ -8,7 +8,7 @@ const idsPredefinidos = ['127', '129']; // IDs fixos para teste
 
 module.exports = (connection) => {
   // Rota para buscar licitações
-  router.get('/licitacoes', async (req, res) => {
+  router.get('/', async (req, res) => {
     try {
       // 1. Obter as licitações para cada ID predefinido
       const licitacoesPromises = idsPredefinidos.map(async (idUnidadeGestora) => {
