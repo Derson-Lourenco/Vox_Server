@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 
+// Supondo que a conexão com o banco de dados é passada para este módulo
 module.exports = (connection) => {
   router.post('/', async (req, res) => {
     const { cpf_cnpj, password } = req.body;
@@ -11,25 +11,19 @@ module.exports = (connection) => {
       return res.status(400).json({ success: false, message: 'CPF/CNPJ e senha são obrigatórios.' });
     }
 
+    // Valores fixos para teste
+    const testCpfCnpj = '12345678900'; // CPF/CNPJ fixo
+    const testPassword = '123'; // Senha fixa
+
     try {
-      // Busca o usuário pelo CPF/CNPJ
-      const [rows] = await connection.execute('SELECT * FROM clientes WHERE cpf_cnpj = ?', [cpf_cnpj]);
-      if (rows.length === 0) {
-        return res.status(401).json({ success: false, message: 'Usuário não encontrado.' });
+      // Verifica se o CPF/CNPJ e a senha coincidem com os valores fixos
+      if (cpf_cnpj === testCpfCnpj && password === testPassword) {
+        // Gera o token
+        const token = jwt.sign({ cpf_cnpj }, 'secretKey', { expiresIn: '1h' });
+        return res.json({ success: true, token });
       }
 
-      const user = rows[0];
-
-      // Comparação da senha criptografada
-      const isMatch = await bcrypt.compare(password, user.senha);
-      if (!isMatch) {
-        return res.status(401).json({ success: false, message: 'Senha incorreta.' });
-      }
-
-      // Gera o token
-      const token = jwt.sign({ id: user.id, cpf_cnpj: user.cpf_cnpj }, 'secretKey', { expiresIn: '1h' });
-
-      res.json({ success: true, token });
+      return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
     } catch (error) {
       console.error('Erro ao fazer login:', error);
       res.status(500).json({ success: false, message: 'Erro ao fazer login.' });
