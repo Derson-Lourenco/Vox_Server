@@ -1,14 +1,11 @@
-// Em routes/auth.js ou similar
-
+// Adicione a conexão do banco de dados como parâmetro
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// Importar o pool ou conexão MySQL aqui
-
 // Rota para login
-router.post('/login', async (req, res) => {
+router.post('/', async (req, res) => {
   const { cpf_cnpj, password } = req.body;
 
   if (!cpf_cnpj || !password) {
@@ -16,7 +13,6 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    // Consulta ao banco para verificar o CPF/CNPJ e senha
     const [rows] = await connection.execute('SELECT * FROM users WHERE cpf_cnpj = ?', [cpf_cnpj]);
     if (rows.length === 0) {
       return res.status(401).json({ success: false, message: 'Usuário não encontrado.' });
@@ -29,7 +25,6 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ success: false, message: 'Senha incorreta.' });
     }
 
-    // Gerar token JWT ou outro método de autenticação
     const token = jwt.sign({ id: user.id, cpf_cnpj: user.cpf_cnpj }, 'secretKey', { expiresIn: '1h' });
 
     res.json({ success: true, token });
