@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
 const axios = require('axios');  // Adicione o axios para fazer a requisição à API do TCE
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -33,7 +34,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-
+// Configuração de segurança
 app.use((req, res, next) => {
   res.setHeader("Content-Security-Policy", "default-src 'self'; style-src 'self' https://www.gstatic.com");
   next();
@@ -47,11 +48,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// Importa e usa as rotas definidas em contratos.js
+// Importa e usa as rotas
 const contratosRouter = require('./routes/contratos')(connection);
 app.use('/contratos', contratosRouter);
 
-// Importa e usa as rotas definidas em licitacoes.js
 const licitacoesRouter = require('./routes/licitacoes')(connection);
 app.use('/licitacoes', licitacoesRouter);
 
@@ -60,7 +60,6 @@ app.use('/clientes', clientesRouter);
 
 const loginRouter = require('./routes/login')(connection);
 app.use('/login', loginRouter);
-
 
 // Inicia o servidor
 app.listen(port, () => {

@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
-// Supondo que a conexão com o banco de dados é passada para este módulo
 module.exports = (connection) => {
   router.post('/', async (req, res) => {
     const { cpf_cnpj, password } = req.body;
@@ -20,8 +20,9 @@ module.exports = (connection) => {
 
       const user = rows[0];
 
-      // Comparação direta da senha
-      if (user.senha !== password) {
+      // Comparação da senha criptografada
+      const isMatch = await bcrypt.compare(password, user.senha);
+      if (!isMatch) {
         return res.status(401).json({ success: false, message: 'Senha incorreta.' });
       }
 
