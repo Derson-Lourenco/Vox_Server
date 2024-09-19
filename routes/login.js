@@ -9,15 +9,15 @@ const jwt = require('jsonwebtoken');
 
 // Rota para login
 router.post('/login', async (req, res) => {
-  const { cpfCnpj, password } = req.body;
+  const { cpf_cnpj, password } = req.body;
 
-  if (!cpfCnpj || !password) {
+  if (!cpf_cnpj || !password) {
     return res.status(400).json({ success: false, message: 'CPF/CNPJ e senha são obrigatórios.' });
   }
 
   try {
     // Consulta ao banco para verificar o CPF/CNPJ e senha
-    const [rows] = await connection.execute('SELECT * FROM users WHERE cpf_cnpj = ?', [cpfCnpj]);
+    const [rows] = await connection.execute('SELECT * FROM users WHERE cpf_cnpj = ?', [cpf_cnpj]);
     if (rows.length === 0) {
       return res.status(401).json({ success: false, message: 'Usuário não encontrado.' });
     }
@@ -30,7 +30,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Gerar token JWT ou outro método de autenticação
-    const token = jwt.sign({ id: user.id, cpfCnpj: user.cpf_cnpj }, 'secretKey', { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id, cpf_cnpj: user.cpf_cnpj }, 'secretKey', { expiresIn: '1h' });
 
     res.json({ success: true, token });
   } catch (error) {
