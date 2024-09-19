@@ -12,7 +12,7 @@ module.exports = (connection) => {
     }
 
     // Valores fixos para teste
-    const testCpfCnpj = '12345678900'; // CPF/CNPJ fixo
+    const testCpfCnpj = '123'; // CPF/CNPJ fixo
     const testPassword = '123'; // Senha fixa
 
     try {
