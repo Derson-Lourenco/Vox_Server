@@ -1,4 +1,3 @@
-// Adicione a conexão do banco de dados como parâmetro
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
@@ -19,7 +18,7 @@ router.post('/', async (req, res) => {
     }
 
     const user = rows[0];
-    const match = await bcrypt.compare(password, user.password);
+    const match = await bcrypt.compare(password, user.senha);
 
     if (!match) {
       return res.status(401).json({ success: false, message: 'Senha incorreta.' });

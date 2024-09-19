@@ -60,6 +60,8 @@ app.use('/clientes', clientesRouter);
 
 const loginRouter = require('./routes/login')(connection);
 app.use('/login', loginRouter);
+
+
 // Inicia o servidor
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
