@@ -166,26 +166,21 @@ module.exports = connection => {
 
   // Rota para obter detalhes de um contrato específico
   router.get('/detalheContrato/:id', (req, res) => {
-    const { id } = req.params
-
-    connection.query(
-      'SELECT * FROM contratos WHERE id = ?',
-      [id],
-      (err, result) => {
+    const { id } = req.params;
+    connection.query('SELECT * FROM contratos WHERE id = ?', [id], (err, result) => {
         if (err) {
-          console.error('Erro ao buscar contrato:', err)
-          res.status(500).json({ error: 'Erro interno do servidor' })
-          return
+            console.error('Erro ao buscar contrato:', err);
+            res.status(500).json({ error: 'Erro interno do servidor' });
+            return;
         }
-
         if (result.length === 0) {
-          res.status(404).json({ error: 'Contrato não encontrado' })
+            res.status(404).json({ error: 'Contrato não encontrado' });
         } else {
-          res.status(200).json({ success: true, contrato: result[0] })
+            res.status(200).json({ success: true, contrato: result[0] });
         }
-      }
-    )
-  })
+    });
+  });
+
 
   return router
 }
