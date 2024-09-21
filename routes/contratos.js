@@ -165,7 +165,7 @@ module.exports = connection => {
   })
 
   // Rota para obter detalhes de um contrato específico
-  router.get('/contratos/:id', (req, res) => {
+  router.get('/:id', (req, res) => {
     const { id } = req.params
 
     connection.query(
