@@ -52,6 +52,9 @@ app.use((req, res, next) => {
 const contratosRouter = require('./routes/contratos')(connection);
 app.use('/contratos', contratosRouter);
 
+const detalheContratoRouter = require('./routes/detalheContrato')(connection);
+app.use('/detalheContrato', detalheContratoRouter);
+
 const licitacoesRouter = require('./routes/licitacoes')(connection);
 app.use('/licitacoes', licitacoesRouter);
 
