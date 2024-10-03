@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt'); // Para senhas criptografadas
 
 // Middleware para autenticação JWT
 const authenticateToken = (req, res, next) => {
@@ -28,7 +27,7 @@ module.exports = (connection) => {
     try {
       // Consulta o usuário no banco de dados pelo CPF/CNPJ
       const query = 'SELECT * FROM usuarios WHERE cpf_cnpj = ?';
-      connection.query(query, [cpf_cnpj], async (err, results) => {
+      connection.query(query, [cpf_cnpj], (err, results) => {
         if (err) {
           console.error('Erro ao buscar o usuário no banco de dados:', err);
           return res.status(500).json({ success: false, message: 'Erro no servidor.' });
@@ -40,10 +39,8 @@ module.exports = (connection) => {
 
         const user = results[0];
 
-        // Compara a senha fornecida com a senha armazenada no banco (supondo que esteja criptografada)
-        const passwordMatch = await bcrypt.compare(password, user.senha);
-
-        if (!passwordMatch) {
+        // Compara a senha fornecida com a senha armazenada (sem criptografia)
+        if (password !== user.senha) {
           return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
         }
 
