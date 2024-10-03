@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt'); // Para senhas criptografadas
 
 // Middleware para autenticação JWT
 const authenticateToken = (req, res, next) => {
@@ -24,18 +25,32 @@ module.exports = (connection) => {
       return res.status(400).json({ success: false, message: 'CPF/CNPJ e senha são obrigatórios.' });
     }
 
-    // Testando login com valores fixos
-    const testCpfCnpj = '123';
-    const testPassword = '123';
-
     try {
-      if (cpf_cnpj === testCpfCnpj && password === testPassword) {
-        // Gera o token
-        const token = jwt.sign({ cpf_cnpj }, 'secretKey', { expiresIn: '1h' });
-        return res.json({ success: true, token });
-      }
+      // Consulta o usuário no banco de dados pelo CPF/CNPJ
+      const query = 'SELECT * FROM usuarios WHERE cpf_cnpj = ?';
+      connection.query(query, [cpf_cnpj], async (err, results) => {
+        if (err) {
+          console.error('Erro ao buscar o usuário no banco de dados:', err);
+          return res.status(500).json({ success: false, message: 'Erro no servidor.' });
+        }
 
-      return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
+        if (results.length === 0) {
+          return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
+        }
+
+        const user = results[0];
+
+        // Compara a senha fornecida com a senha armazenada no banco (supondo que esteja criptografada)
+        const passwordMatch = await bcrypt.compare(password, user.senha);
+
+        if (!passwordMatch) {
+          return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
+        }
+
+        // Gera o token JWT
+        const token = jwt.sign({ cpf_cnpj: user.cpf_cnpj }, 'secretKey', { expiresIn: '1h' });
+        return res.json({ success: true, token });
+      });
     } catch (error) {
       console.error('Erro ao fazer login:', error);
       return res.status(500).json({ success: false, message: 'Erro ao fazer login.' });
