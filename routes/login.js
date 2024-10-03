@@ -19,11 +19,11 @@ module.exports = (connection) => {
   // Login
   router.post('/login', async (req, res) => {
     const { cpf_cnpj, password } = req.body;
-
+  
     if (!cpf_cnpj || !password) {
       return res.status(400).json({ success: false, message: 'CPF/CNPJ e senha são obrigatórios.' });
     }
-
+  
     try {
       // Consulta o usuário no banco de dados pelo CPF/CNPJ
       const query = 'SELECT * FROM usuarios WHERE cpf_cnpj = ?';
@@ -32,18 +32,22 @@ module.exports = (connection) => {
           console.error('Erro ao buscar o usuário no banco de dados:', err);
           return res.status(500).json({ success: false, message: 'Erro no servidor.' });
         }
-
+  
         if (results.length === 0) {
           return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
         }
-
+  
         const user = results[0];
-
+  
+        // Adicionando logs para debug
+        console.log('Senha enviada pelo usuário:', password);
+        console.log('Senha armazenada no banco de dados:', user.senha);
+  
         // Compara a senha fornecida com a senha armazenada (sem criptografia)
-        if (password !== user.senha) {
+        if (password.trim() !== user.senha.trim()) {
           return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
         }
-
+  
         // Gera o token JWT
         const token = jwt.sign({ cpf_cnpj: user.cpf_cnpj }, 'secretKey', { expiresIn: '1h' });
         return res.json({ success: true, token });
@@ -53,6 +57,7 @@ module.exports = (connection) => {
       return res.status(500).json({ success: false, message: 'Erro ao fazer login.' });
     }
   });
+  
 
   // Rota protegida de exemplo
   router.get('/dashboard', authenticateToken, (req, res) => {
