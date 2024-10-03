@@ -14,7 +14,7 @@ module.exports = connection => {
       res.status(200).json({ success: true, contratos: results })
     })
   })
-
+  
   // Rota para salvar um novo contrato
   router.post('/salvarContrato', (req, res) => {
     const {
