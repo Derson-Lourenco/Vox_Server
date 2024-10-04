@@ -56,8 +56,12 @@ module.exports = (connection) => {
     }
   });
 
+  // Rota de Dashboard
   router.get('/dashboard', authenticateToken, (req, res) => {
-    res.json({ message: 'Bem-vindo ao dashboard!' });
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Acesso negado, apenas administradores podem acessar esta rota.' });
+    }
+    res.json({ message: 'Bem-vindo ao dashboard do administrador!' });
   });
 
   return router;
