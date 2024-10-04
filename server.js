@@ -75,8 +75,8 @@ app.use('/contratos', contratosRouter)
 const licitacoesRouter = require('./routes/licitacoes')(connection)
 app.use('/licitacoes', licitacoesRouter)
 
-const municipiosRouter = require('./routes/municipios')(connection);
-app.use('/Id_municipio', municipiosRouter);
+const prefeiturasRouter = require('./routes/prefeituras')(connection);
+app.use('/prefeituras', prefeiturasRouter);
 // Inicia o servidor
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`)
