@@ -42,6 +42,26 @@ app.use((req, res, next) => {
   next()
 })
 
+app.post('/salvar-municipios', (req, res) => {
+  const { municipios } = req.body;
+
+  if (!municipios || !Array.isArray(municipios)) {
+    return res.status(400).json({ message: 'Dados inválidos.' });
+  }
+
+  const query = 'INSERT INTO municipios (id) VALUES ?';
+  const values = municipios.map((id) => [id]); // Formata os dados para a consulta
+
+  connection.query(query, [values], (error, results) => {
+    if (error) {
+      console.error('Erro ao salvar municípios:', error);
+      return res.status(500).json({ message: 'Erro ao salvar municípios' });
+    }
+
+    res.status(201).json({ message: 'Municípios salvos com sucesso!' });
+  });
+});
+
 // Importa e usa as rotas para paginas 
 const clientesRouter = require('./routes/clientes')(connection)
 app.use('/clientes', clientesRouter)
@@ -55,6 +75,8 @@ app.use('/contratos', contratosRouter)
 const licitacoesRouter = require('./routes/licitacoes')(connection)
 app.use('/licitacoes', licitacoesRouter)
 
+const municipiosRouter = require('./routes/municipios')(connection);
+app.use('/Id_municipio', municipiosRouter);
 // Inicia o servidor
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`)
