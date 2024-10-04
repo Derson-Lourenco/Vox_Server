@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
-const axios = require('axios');  // Adicione o axios para fazer a requisição à API do TCE
 const jwt = require('jsonwebtoken');
 
 const app = express();
@@ -49,17 +48,17 @@ app.use((req, res, next) => {
 });
 
 // Importa e usa as rotas
-const contratosRouter = require('./routes/contratos')(connection);
-app.use('/contratos', contratosRouter);
-
-const licitacoesRouter = require('./routes/licitacoes')(connection);
-app.use('/licitacoes', licitacoesRouter);
-
 const clientesRouter = require('./routes/clientes')(connection);
 app.use('/clientes', clientesRouter);
 
 const loginRouter = require('./routes/login')(connection);
 app.use('/login', loginRouter);
+
+const contratosRouter = require('./routes/contratos')(connection);
+app.use('/contratos', contratosRouter);
+
+const licitacoesRouter = require('./routes/licitacoes')(connection);
+app.use('/licitacoes', licitacoesRouter);
 
 // Inicia o servidor
 app.listen(port, () => {
