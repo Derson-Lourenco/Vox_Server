@@ -9,7 +9,6 @@ const authenticateToken = (req, res, next) => {
   const token = req.headers['authorization'];
   if (!token) return res.status(401).json({ message: 'Acesso negado, token não fornecido.' });
 
-  // Verifica o token JWT
   jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
     if (err) return res.status(403).json({ message: 'Token inválido.' });
     req.user = user;
@@ -18,7 +17,6 @@ const authenticateToken = (req, res, next) => {
 };
 
 module.exports = (connection) => {
-  // Login
   router.post('/login', [
     check('cpf_cnpj').isLength({ min: 11, max: 14 }).withMessage('CPF/CNPJ deve ter entre 11 e 14 caracteres'),
     check('password').notEmpty().withMessage('Senha é obrigatória'),
@@ -31,7 +29,6 @@ module.exports = (connection) => {
     const { cpf_cnpj, password } = req.body;
 
     try {
-      // Consulta o usuário no banco de dados pelo CPF/CNPJ
       const query = 'SELECT * FROM clientes WHERE cpf_cnpj = ?';
       connection.query(query, [cpf_cnpj], async (err, results) => {
         if (err) {
@@ -45,13 +42,11 @@ module.exports = (connection) => {
 
         const user = results[0];
 
-        // Compara a senha fornecida com a senha criptografada no banco de dados
         const passwordMatch = await bcrypt.compare(password, user.senha);
         if (!passwordMatch) {
           return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
         }
 
-        // Gera o token JWT
         const token = jwt.sign({ cpf_cnpj: user.cpf_cnpj, role: user.role }, process.env.SECRET_KEY, { expiresIn: '1h' });
         return res.json({ success: true, token });
       });
@@ -61,7 +56,6 @@ module.exports = (connection) => {
     }
   });
 
-  // Rota protegida de exemplo
   router.get('/dashboard', authenticateToken, (req, res) => {
     res.json({ message: 'Bem-vindo ao dashboard!' });
   });

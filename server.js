@@ -47,7 +47,7 @@ const clientesRouter = require('./routes/clientes')(connection)
 app.use('/clientes', clientesRouter)
 
 const loginRouter = require('./routes/login')(connection)
-app.use('/login', loginRouter) // Atualizando a rota de login
+app.use('/login', loginRouter)
 
 const contratosRouter = require('./routes/contratos')(connection)
 app.use('/contratos', contratosRouter)
