@@ -1,57 +1,68 @@
-// routes/login.js
 const express = require('express');
-const { body, validationResult } = require('express-validator');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const { check, validationResult } = require('express-validator');
 
-// Validação simples de CPF/CNPJ
-const validateCpfCnpj = (value) => {
-  // Adicione aqui a lógica de validação para CPF/CNPJ
-  if (!/^\d{11}$/.test(value) && !/^\d{14}$/.test(value)) {
-    throw new Error('CPF ou CNPJ inválido');
-  }
-  return true;
+// Middleware para autenticação JWT
+const authenticateToken = (req, res, next) => {
+  const token = req.headers['authorization'];
+  if (!token) return res.status(401).json({ message: 'Acesso negado, token não fornecido.' });
+
+  jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
+    if (err) return res.status(403).json({ message: 'Token inválido.' });
+    req.user = user;
+    next();
+  });
 };
 
-// Endpoint para login
-router.post('/login',
-  [
-    body('cpf_cnpj').custom(validateCpfCnpj),
-    body('senha').notEmpty().withMessage('Senha é obrigatória'),
-  ],
-  async (req, res) => {
+module.exports = (connection) => {
+  router.post('/login', [
+    check('cpf_cnpj').isLength({ min: 11, max: 14 }).withMessage('CPF/CNPJ deve ter entre 11 e 14 caracteres'),
+    check('password').notEmpty().withMessage('Senha é obrigatória'),
+  ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const { cpf_cnpj, senha } = req.body;
+    const { cpf_cnpj, password } = req.body;
 
     try {
-      // Aqui você deve buscar o usuário no banco de dados
-      const usuario = await User.findOne({ cpf_cnpj }); // Substitua por sua lógica de busca
+      const query = 'SELECT * FROM clientes WHERE cpf_cnpj = ?';
+      connection.query(query, [cpf_cnpj], async (err, results) => {
+        if (err) {
+          console.error('Erro ao buscar o usuário no banco de dados:', err);
+          return res.status(500).json({ success: false, message: 'Erro no servidor.' });
+        }
 
-      if (!usuario) {
-        return res.status(401).json({ message: 'Usuário não encontrado' });
-      }
+        if (results.length === 0) {
+          return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
+        }
 
-      // Verifica a senha
-      const match = await bcrypt.compare(senha, usuario.senha);
-      if (!match) {
-        return res.status(401).json({ message: 'Senha incorreta' });
-      }
+        const user = results[0];
 
-      // Crie um token JWT (opcional)
-      const token = jwt.sign({ id: usuario._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const passwordMatch = await bcrypt.compare(password, user.senha);
+        if (!passwordMatch) {
+          return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
+        }
 
-      res.json({ token, usuario });
+        const token = jwt.sign({ cpf_cnpj: user.cpf_cnpj, role: user.role }, process.env.SECRET_KEY, { expiresIn: '1h' });
+        return res.json({ success: true, token });
+      });
     } catch (error) {
       console.error('Erro ao fazer login:', error);
-      res.status(500).json({ message: 'Erro ao fazer login' });
+      return res.status(500).json({ success: false, message: 'Erro ao fazer login.' });
     }
-  }
-);
+  });
 
-module.exports = router;
+  // Rota de Dashboard
+  router.get('/dashboard', authenticateToken, (req, res) => {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Acesso negado, apenas administradores podem acessar esta rota.' });
+    }
+    res.json({ message: 'Bem-vindo ao dashboard do administrador!' });
+  });
+
+  return router;
+};
