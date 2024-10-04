@@ -1,7 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
-const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+
+dotenv.config(); // Carrega as variáveis de ambiente do arquivo .env
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -32,13 +34,6 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
-
-// Configuração de segurança
-app.use((req, res, next) => {
-  res.setHeader("Content-Security-Policy", "default-src 'self'; style-src 'self' https://www.gstatic.com");
-  next();
-});
-
 app.use(express.json());
 
 // Middleware para registrar solicitações
@@ -52,7 +47,7 @@ const clientesRouter = require('./routes/clientes')(connection);
 app.use('/clientes', clientesRouter);
 
 const loginRouter = require('./routes/login')(connection);
-app.use('/login', loginRouter);
+app.use('/', loginRouter); // Atualizando a rota de login
 
 const contratosRouter = require('./routes/contratos')(connection);
 app.use('/contratos', contratosRouter);
