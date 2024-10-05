@@ -77,7 +77,7 @@ const licitacoesRouter = require('./routes/licitacoes')(connection)
 app.use('/licitacoes', licitacoesRouter)
 
 // app.use('/prefeituras', prefeituraroutes);
-
+//teste
 const prefeituraroutes = require('./routes/prefeituras')(connection)
 app.use('/prefeituras', prefeituraroutes)
 // Inicia o servidor

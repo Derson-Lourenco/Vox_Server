@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
     if (!municipios || !Array.isArray(municipios)) {
       return res.status(500).json({ message: 'Dados de municípios não disponíveis' });
     }
-
+    //teste
     // Transforma o resultado
     const resultado = municipios.map(municipio => ({
       id: municipio.id,
