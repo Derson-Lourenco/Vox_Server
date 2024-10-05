@@ -7,7 +7,7 @@ router.get('/', async (req, res) => {
     const response = await axios.get('http://sistemas.tce.pi.gov.br/api/portaldacidadania//prefeituras');
     const municipios = response.data;
 
-    // Checando se o dado existe e é um array
+    // Verificando se os dados estão disponíveis
     if (!municipios || !Array.isArray(municipios)) {
       return res.status(500).json({ message: 'Dados de municípios não disponíveis' });
     }
