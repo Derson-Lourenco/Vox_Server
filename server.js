@@ -2,7 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const mysql = require('mysql2')
 const dotenv = require('dotenv')
-const prefeituraroutes = require('./routes/prefeituras'); // Certifique-se de que o caminho está correto
+// const prefeituraroutes = require('./routes/prefeituras');
 
 dotenv.config() // Carrega as variáveis de ambiente do arquivo .env
 
@@ -76,9 +76,10 @@ app.use('/contratos', contratosRouter)
 const licitacoesRouter = require('./routes/licitacoes')(connection)
 app.use('/licitacoes', licitacoesRouter)
 
-app.use('/prefeituras', prefeituraroutes);
+// app.use('/prefeituras', prefeituraroutes);
 
-
+const prefeituraroutes = require('./routes/prefeituras')(connection)
+app.use('/prefeituras', prefeituraroutes)
 // Inicia o servidor
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`)
