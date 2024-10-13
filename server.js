@@ -11,10 +11,10 @@ const port = process.env.PORT || 5000
 
 // Configurações de conexão MySQL
 const connection = mysql.createConnection({
-  host: process.env.DB_HOST || 'vox.c34okqo2iv4k.us-east-1.rds.amazonaws.com',
-  user: process.env.DB_USER || 'dersonls',
-  password: process.env.DB_PASSWORD || 'Lara795816',
-  database: process.env.DB_NAME || 'gerenciador'
+  host: process.env.DB_HOST || '108.179.193.0',
+  user: process.env.DB_USER || 'voxger94_VoxGerenciador',
+  password: process.env.DB_PASSWORD || 'L@r@795816',
+  database: process.env.DB_NAME || 'voxger94_gerenciador'
 })
 
 connection.connect(err => {
