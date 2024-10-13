@@ -1,0 +1,25 @@
+name: voxgerenciador.netlify.app CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3  # Atualizado para a versão mais recente
+
+      - name: Deploy para meu Hostgator
+        uses: easingthemes/ssh-deploy@main
+
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "src/"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_PORT: ${{ secrets.REMOTE_PORT }}  # Corrigido de REMOTE_POST para REMOTE_PORT
+          TARGET: ${{ secrets.REMOTE_TARGET }}  # Corrigido espaçamento
