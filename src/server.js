@@ -24,7 +24,7 @@ connection.connect(err => {
   }
   console.log('Conectado ao banco de dados MySQL com sucesso!');
 });
-
+//
 // Configuração do CORS
 const corsOptions = {
   origin: [
