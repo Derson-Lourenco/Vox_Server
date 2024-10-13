@@ -1,21 +1,21 @@
 // bd.js
-const mysql = require('mysql2');
+const mysql = require('mysql2')
 
 // Configurações de conexão MySQL
 const connection = mysql.createConnection({
-  host: '108.179.193.0', // Endpoint da HostGator
-  user: 'voxger94_VoxGerenciador', // Usuário do MySQL
-  password: 'L@r@795816', // Senha do MySQL
-  database: 'voxger94_gerenciador' // Nome do banco de dados
-});
+  host: 'vox.c34okqo2iv4k.us-east-1.rds.amazonaws.com', // Endpoint da HostGator
+  user: 'dersonls', // Usuário do MySQL
+  password: 'Lara795816', // Senha do MySQL
+  database: 'gerenciador' // Nome do banco de dados
+})
 
 // Conexão com o banco de dados
-connection.connect((err) => {
+connection.connect(err => {
   if (err) {
-    console.error('Erro ao conectar ao MySQL:', err);
-    return;
+    console.error('Erro ao conectar ao MySQL:', err)
+    return
   }
-  console.log('Conectado ao banco de dados MySQL com sucesso!');
-});
+  console.log('Conectado ao banco de dados MySQL com sucesso!')
+})
 
-module.exports = connection;
+module.exports = connection
