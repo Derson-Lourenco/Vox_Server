@@ -1,13 +1,13 @@
-const express = require('express')
-const cors = require('cors')
-const mysql = require('mysql2')
-const dotenv = require('dotenv')
-// const prefeituraroutes = require('./routes/prefeituras');
+const express = require('express');
+const cors = require('cors');
+const mysql = require('mysql2');
+const dotenv = require('dotenv');
 
-dotenv.config() // Carrega as variáveis de ambiente do arquivo .env
+// Carregar variáveis de ambiente do arquivo .env, se existir
+dotenv.config();
 
-const app = express()
-const port = process.env.PORT || 5000
+const app = express();
+const port = process.env.PORT || 5000;
 
 // Configurações de conexão MySQL
 const connection = mysql.createConnection({
@@ -15,15 +15,15 @@ const connection = mysql.createConnection({
   user: process.env.DB_USER || 'voxger94_VoxGerenciador',
   password: process.env.DB_PASSWORD || 'L@r@795816',
   database: process.env.DB_NAME || 'voxger94_gerenciador'
-})
+});
 
 connection.connect(err => {
   if (err) {
-    console.error('Erro ao conectar ao MySQL:', err)
-    return
+    console.error('Erro ao conectar ao MySQL:', err);
+    return;
   }
-  console.log('Conectado ao banco de dados MySQL com sucesso!')
-})
+  console.log('Conectado ao banco de dados MySQL com sucesso!');
+});
 
 // Configuração do CORS
 const corsOptions = {
@@ -33,16 +33,17 @@ const corsOptions = {
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}
-app.use(cors(corsOptions))
-app.use(express.json())
+};
+app.use(cors(corsOptions));
+app.use(express.json());
 
 // Middleware para registrar solicitações
 app.use((req, res, next) => {
-  console.log(`Recebida solicitação: ${req.method} ${req.url}`)
-  next()
-})
+  console.log(`Recebida solicitação: ${req.method} ${req.url}`);
+  next();
+});
 
+// Rota para salvar municípios
 app.post('/salvar-municipios', (req, res) => {
   const { municipios } = req.body;
 
@@ -63,24 +64,23 @@ app.post('/salvar-municipios', (req, res) => {
   });
 });
 
-// Importa e usa as rotas para paginas 
-const clientesRouter = require('./routes/clientes')(connection)
-app.use('/clientes', clientesRouter)
+// Importa e usa as rotas para páginas 
+// const clientesRouter = require('./routes/clientes')(connection);
+// app.use('/clientes', clientesRouter);
 
-const loginRouter = require('./routes/login')(connection)
-app.use('/login', loginRouter)
+// const loginRouter = require('./routes/login')(connection);
+// app.use('/login', loginRouter);
 
-const contratosRouter = require('./routes/contratos')(connection)
-app.use('/contratos', contratosRouter)
+const contratosRouter = require('./routes/contratos')(connection);
+app.use('/contratos', contratosRouter);
 
-const licitacoesRouter = require('./routes/licitacoes')(connection)
-app.use('/licitacoes', licitacoesRouter)
+const licitacoesRouter = require('./routes/licitacoes')(connection);
+app.use('/licitacoes', licitacoesRouter);
 
+// const prefeituraroutes = require('./routes/prefeituras')(connection);
 // app.use('/prefeituras', prefeituraroutes);
-//teste
-const prefeituraroutes = require('./routes/prefeituras')(connection)
-app.use('/prefeituras', prefeituraroutes)
+
 // Inicia o servidor
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`)
-})
+  console.log(`Server is running on port ${port}`);
+});
