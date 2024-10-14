@@ -81,6 +81,6 @@ app.use('/licitacoes', licitacoesRouter)
 // app.use('/prefeituras', prefeituraroutes);
 
 // Inicia o servidor
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`)
-})
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server is running on port ${port}`);
+});
