@@ -2,12 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
 const dotenv = require('dotenv');
+const findFreePort = require('find-free-port'); // Certifique-se de instalar essa biblioteca
 
 // Carregar variáveis de ambiente do arquivo .env
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const defaultPort = process.env.PORT || 3000;
 
 // Configurações de conexão MySQL
 const connection = mysql.createConnection({
@@ -84,7 +85,12 @@ app.use('/contratos', contratosRouter);
 const licitacoesRouter = require('./routes/licitacoes')(connection);
 app.use('/licitacoes', licitacoesRouter);
 
-// Inicializa o servidor na porta especificada
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Server is running on port ${port}`);
+// Encontre uma porta livre e inicie o servidor
+findFreePort(defaultPort).then((port) => {
+  console.log(`Porta livre encontrada: ${port}`); // Log da porta encontrada
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`Server is running on port ${port}`);
+  });
+}).catch((err) => {
+  console.error(`Erro ao encontrar porta livre: ${err.message}`);
 });
