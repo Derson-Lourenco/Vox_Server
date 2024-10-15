@@ -2,41 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
 const dotenv = require('dotenv');
-const net = require('net');
 
 // Carregar variáveis de ambiente do arquivo .env
 dotenv.config();
 
 const app = express();
-const defaultPort = process.env.PORT || 3000;
-
-// Função para verificar se a porta está em uso
-function isPortInUse(port) {
-  return new Promise((resolve) => {
-    const server = net.createServer();
-    server.once('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        resolve(true); // Porta em uso
-      } else {
-        resolve(false); // Outro erro
-      }
-    });
-    server.once('listening', () => {
-      server.close();
-      resolve(false); // Porta livre
-    });
-    server.listen(port);
-  });
-}
-
-// Função para encontrar uma porta livre
-async function findFreePort(startingPort) {
-  let port = startingPort;
-  while (await isPortInUse(port)) {
-    port++;
-  }
-  return port;
-}
+const port = process.env.PORT || 3000;
 
 // Configurações de conexão MySQL
 const connection = mysql.createConnection({
@@ -58,8 +29,8 @@ connection.connect(err => {
 // Configuração do CORS
 const corsOptions = {
   origin: [
-    'https://voxgerenciador.netlify.app', // URL do frontend em produção
-    'http://localhost:3000' // URL do frontend local
+    'https://voxgerenciador.netlify.app',
+    'http://localhost:3000'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -75,7 +46,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Rota de teste para verificar se o servidor está funcionando
+// Rota de teste
 app.get('/teste', (req, res) => {
   res.send('Servidor funcionando corretamente!');
 });
@@ -83,16 +54,13 @@ app.get('/teste', (req, res) => {
 // Rota para salvar municípios
 app.post('/salvar-municipios', (req, res) => {
   const { municipios } = req.body;
-
-  // Validação dos dados recebidos
   if (!municipios || !Array.isArray(municipios)) {
     return res.status(400).json({ message: 'Dados inválidos.' });
   }
 
   const query = 'INSERT INTO municipios (id) VALUES ?';
-  const values = municipios.map(id => [id]); // Formata os dados para a consulta
+  const values = municipios.map(id => [id]);
 
-  // Executa a consulta ao banco de dados
   connection.query(query, [values], (error, results) => {
     if (error) {
       console.error('Erro ao salvar municípios:', error);
@@ -116,9 +84,7 @@ app.use('/contratos', contratosRouter);
 const licitacoesRouter = require('./routes/licitacoes')(connection);
 app.use('/licitacoes', licitacoesRouter);
 
-// Inicializa o servidor na porta especificada ou em uma porta livre
-findFreePort(defaultPort).then((port) => {
-  app.listen(port, '0.0.0.0', () => {
-    console.log(`Server is running on port ${port}`);
-  });
+// Inicializa o servidor na porta especificada
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server is running on port ${port}`);
 });
