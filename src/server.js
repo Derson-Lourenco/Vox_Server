@@ -46,6 +46,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Rota de teste para verificar se o servidor está funcionando
+app.get('/teste', (req, res) => {
+  res.send('Servidor funcionando corretamente!');
+});
+
 // Rota para salvar municípios
 app.post('/salvar-municipios', (req, res) => {
   const { municipios } = req.body;
