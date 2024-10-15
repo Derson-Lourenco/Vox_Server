@@ -79,8 +79,8 @@ app.post('/salvar-municipios', (req, res) => {
 const contratosRouter = require('./routes/contratos')(connection);
 app.use('/contratos', contratosRouter);
 
-const licitacoesRouter = require('./routes/licitacoes')(connection);
-app.use('/licitacoes', licitacoesRouter);
+// const licitacoesRouter = require('./routes/licitacoes')(connection);
+// app.use('/licitacoes', licitacoesRouter);
 
 // Inicializa o servidor na porta especificada
 app.listen(port, '0.0.0.0', () => {
