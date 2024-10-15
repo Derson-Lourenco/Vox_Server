@@ -15,7 +15,7 @@ connection.connect(err => {
     console.error('Erro ao conectar ao MySQL:', err)
     return
   }
-  console.log('Conectado ao banco de dados MySQL com sucesso!')
+  console.log('Conectado ao banco de dados MySQL com sucessow!')
 })
 
 module.exports = connection
