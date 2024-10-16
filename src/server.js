@@ -8,7 +8,7 @@ const findFreePort = require('find-free-port'); // Certifique-se de instalar ess
 dotenv.config();
 
 const app = express();
-const defaultPort = process.env.PORT || 3000;
+const defaultPort = process.env.PORT || 5000;
 
 // Configurações de conexão MySQL
 const connection = mysql.createConnection({
