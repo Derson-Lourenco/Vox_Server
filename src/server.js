@@ -86,11 +86,12 @@ const licitacoesRouter = require('./routes/licitacoes')(connection);
 app.use('/licitacoes', licitacoesRouter);
 
 // Encontre uma porta livre e inicie o servidor
-findFreePort(defaultPort).then((port) => {
+findFreePort(defaultPort).then(([port]) => { // Pega o primeiro valor do array retornado
   console.log(`Porta livre encontrada: ${port}`); // Log da porta encontrada
   app.listen(port, '0.0.0.0', () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`Servidor rodando na porta ${port}`);
   });
 }).catch((err) => {
   console.error(`Erro ao encontrar porta livre: ${err.message}`);
 });
+  
