@@ -49,7 +49,7 @@ module.exports = connection => {
 
       console.log('Detalhes combinados:', detalhesFlattened) // Log dos detalhes finais
 
-      // Retornar os dados combinados
+      // Retornar os dados combinados twse
       res.json(detalhesFlattened)
     } catch (error) {
       console.error('Erro ao buscar dados:', error.message)
