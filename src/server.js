@@ -3,6 +3,7 @@ const cors = require('cors');
 const mysql = require('mysql2');
 const dotenv = require('dotenv');
 const findFreePort = require('find-free-port'); // Certifique-se de instalar essa biblioteca
+const createMunicipiosRouter = require('./routes/municipios'); // Importa a função de criação do router
 
 // Carregar variáveis de ambiente do arquivo .env
 dotenv.config();
@@ -52,29 +53,12 @@ app.get('/teste', (req, res) => {
   res.send('Servidor funcionando corretamente!');
 });
 
-// Rota para salvar municípios
-app.post('/salvar-municipios', (req, res) => {
-  const { municipios } = req.body;
-  if (!municipios || !Array.isArray(municipios)) {
-    return res.status(400).json({ message: 'Dados inválidos.' });
-  }
-
-  const query = 'INSERT INTO municipios (id) VALUES ?';
-  const values = municipios.map(id => [id]);
-
-  connection.query(query, [values], (error, results) => {
-    if (error) {
-      console.error('Erro ao salvar municípios:', error);
-      return res.status(500).json({ message: 'Erro ao salvar municípios' });
-    }
-
-    res.status(201).json({ message: 'Municípios salvos com sucesso!' });
-  });
-});
-
 // Importa e usa as rotas para páginas
 const clientesRouter = require('./routes/clientes')(connection);
 app.use('/clientes', clientesRouter);
+
+const municipiosRouter = createMunicipiosRouter(connection); // Cria o router
+app.use('/municipios', municipiosRouter);
 
 const loginRouter = require('./routes/login')(connection);
 app.use('/login', loginRouter);
@@ -94,4 +78,3 @@ findFreePort(defaultPort).then(([port]) => { // Pega o primeiro valor do array r
 }).catch((err) => {
   console.error(`Erro ao encontrar porta livre: ${err.message}`);
 });
-  
