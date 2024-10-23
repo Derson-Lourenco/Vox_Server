@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # 1. Baixar o código do repositório
+      # 1. Baixar o código do repositório add
       - name: Check out the repository
         uses: actions/checkout@v2
 
