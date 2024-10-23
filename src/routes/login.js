@@ -56,7 +56,7 @@ module.exports = (connection) => {
     }
   });
 
-  // Rota de Dashboard
+  // Rota de Dashboarde
   router.get('/dashboard', authenticateToken, (req, res) => {
     if (req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Acesso negado, apenas administradores podem acessar esta rota.' });
