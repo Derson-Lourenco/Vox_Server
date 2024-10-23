@@ -57,10 +57,10 @@ app.get('/teste', (req, res) => {
 const clientesRouter = require('./routes/clientes')(connection);
 app.use('/clientes', clientesRouter);
 
-// const municipiosRouter = createMunicipiosRouter(connection); // Cria o router
-// app.use('/municipios', municipiosRouter);
+const municipiosRouter = createMunicipiosRouter(connection); // Cria o router
+app.use('/municipios', municipiosRouter);
 
-const loginRouter = require('./routes/login/login')(connection);
+const loginRouter = require('./routes/login/')(connection);
 app.use('/login', loginRouter);
 
 const contratosRouter = require('./routes/contratos')(connection);
