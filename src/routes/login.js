@@ -18,7 +18,9 @@ const authenticateToken = (req, res, next) => {
 
 module.exports = (connection) => {
   router.post('/login', [
-    check('cpf_cnpj').isLength({ min: 11, max: 14 }).withMessage('CPF/CNPJ deve ter entre 11 e 14 caracteres'),
+    check('cpf_cnpj')
+      .isLength({ min: 11, max: 14 })
+      .withMessage('CPF/CNPJ deve ter entre 11 e 14 caracteres'),
     check('password').notEmpty().withMessage('Senha é obrigatória'),
   ], async (req, res) => {
     const errors = validationResult(req);
@@ -27,6 +29,7 @@ module.exports = (connection) => {
     }
 
     const { cpf_cnpj, password } = req.body;
+    console.log('CPF/CNPJ recebido:', cpf_cnpj); // Log para verificar o valor recebido
 
     try {
       const query = 'SELECT * FROM clientes WHERE cpf_cnpj = ?';
@@ -36,17 +39,21 @@ module.exports = (connection) => {
           return res.status(500).json({ success: false, message: 'Erro no servidor.' });
         }
 
+        console.log('Resultados da consulta:', results); // Log para verificar os resultados da consulta
+
         if (results.length === 0) {
           return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
         }
 
         const user = results[0];
 
+        // Verificar se a senha foi armazenada corretamente usando bcrypt
         const passwordMatch = await bcrypt.compare(password, user.senha);
         if (!passwordMatch) {
           return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
         }
 
+        // Gerar o token JWT
         const token = jwt.sign({ cpf_cnpj: user.cpf_cnpj, role: user.role }, process.env.SECRET_KEY, { expiresIn: '1h' });
         return res.json({ success: true, token });
       });
@@ -56,7 +63,7 @@ module.exports = (connection) => {
     }
   });
 
-  // Rota de Dashboarde
+  // Rota de Dashboard
   router.get('/dashboard', authenticateToken, (req, res) => {
     if (req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Acesso negado, apenas administradores podem acessar esta rota.' });

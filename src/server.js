@@ -60,7 +60,7 @@ app.use('/clientes', clientesRouter);
 // const municipiosRouter = createMunicipiosRouter(connection); // Cria o router
 // app.use('/municipios', municipiosRouter);
 
-const loginRouter = require('./routes/login')(connection);
+const loginRouter = require('./routes/login/login')(connection);
 app.use('/login', loginRouter);
 
 const contratosRouter = require('./routes/contratos')(connection);
