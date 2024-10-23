@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # 1. Baixar o código do repositóriogg
+      # 1. Baixar o código do repositório
       - name: Check out the repository
         uses: actions/checkout@v2
 
@@ -18,14 +18,14 @@ jobs:
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh  # Cria o diretório SSH, se não existir
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa  # Adiciona a chave privada do Secret
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa # Adiciona a chave privada do Secret
           chmod 600 ~/.ssh/id_rsa  # Ajusta permissões da chave privada
-          ssh-keyscan -H <EC2_PUBLIC_IP> >> ~/.ssh/known_hosts  # Adiciona EC2 à lista de hosts conhecidos
+          ssh-keyscan -H 100.27.193.147 >> ~/.ssh/known_hosts  # Adiciona EC2 à lista de hosts conhecidos
 
       # 3. Conectar ao EC2 e fazer o deploy
       - name: Deploy to EC2
         run: |
-          ssh ubuntu@100.27.193.147 << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@100.27.193.147 << 'EOF'
             cd /Vox_Server/src  # Substituir pelo caminho do seu projeto
             git pull origin main  # Puxa as últimas mudanças do branch principal
             npm install  # Instala dependências, se necessário
