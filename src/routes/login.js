@@ -22,6 +22,9 @@ module.exports = (connection) => {
     check('cpf_cnpj').isLength({ min: 11, max: 14 }).withMessage('CPF/CNPJ deve ter entre 11 e 14 caracteres'),
     check('senha').notEmpty().withMessage('Senha é obrigatória'),
   ], async (req, res) => {
+    // Adiciona o console.log para visualizar os dados recebidos
+    console.log('Dados recebidos para login:', req.body);
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ success: false, errors: errors.array() });
@@ -43,12 +46,12 @@ module.exports = (connection) => {
 
         const user = results[0];
 
-        // Aqui, vamos comparar diretamente a senha, sem criptografia
+        // Comparando a senha diretamente
         if (user.senha !== senha) {
           return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
         }
 
-        // Se a senha estiver correta, gere um token JWT
+        // Gerar um token JWT
         const token = jwt.sign({ cpf_cnpj: user.cpf_cnpj, role: user.role }, process.env.SECRET_KEY, { expiresIn: '1h' });
         return res.json({ success: true, token });
       });
