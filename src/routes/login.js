@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt'); // Importando bcrypt
 const { check, validationResult } = require('express-validator');
 
 // Middleware para autenticação JWT
@@ -33,7 +34,7 @@ module.exports = (connection) => {
 
     try {
       const query = 'SELECT * FROM clientes WHERE email = ?';
-      connection.query(query, [email], (err, results) => {
+      connection.query(query, [email], async (err, results) => { // Adicione "async" aqui
         if (err) {
           console.error('Erro ao buscar o usuário no banco de dados:', err);
           return res.status(500).json({ success: false, message: 'Erro no servidor.' });
@@ -45,8 +46,9 @@ module.exports = (connection) => {
 
         const user = results[0];
 
-        // Comparando a senha diretamente
-        if (user.senha !== senha) {
+        // Comparando a senha usando bcrypt
+        const match = await bcrypt.compare(senha, user.senha); // Usando bcrypt para comparar
+        if (!match) {
           return res.status(401).json({ success: false, message: 'E-mail ou senha incorretos.' });
         }
 
