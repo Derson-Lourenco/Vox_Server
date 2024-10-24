@@ -20,14 +20,14 @@ module.exports = (connection) => {
   // Rota de login
   router.post('/login', [
     check('cpf_cnpj').isLength({ min: 11, max: 14 }).withMessage('CPF/CNPJ deve ter entre 11 e 14 caracteres'),
-    check('password').notEmpty().withMessage('Senha é obrigatória'),
+    check('senha').notEmpty().withMessage('Senha é obrigatória'),
   ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const { cpf_cnpj, password } = req.body;
+    const { cpf_cnpj, senha } = req.body;
 
     try {
       const query = 'SELECT * FROM clientes WHERE cpf_cnpj = ?';
@@ -44,7 +44,7 @@ module.exports = (connection) => {
         const user = results[0];
 
         // Aqui, vamos comparar diretamente a senha, sem criptografia
-        if (user.senha !== password) {
+        if (user.senha !== senha) {
           return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
         }
 
