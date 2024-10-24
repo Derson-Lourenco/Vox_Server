@@ -1,3 +1,4 @@
+require('dotenv').config(); // Carrega as variáveis do .env
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
