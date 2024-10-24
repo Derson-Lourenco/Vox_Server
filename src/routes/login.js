@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 const { check, validationResult } = require('express-validator');
 
 // Middleware para autenticação JWT
@@ -32,7 +31,7 @@ module.exports = (connection) => {
 
     try {
       const query = 'SELECT * FROM clientes WHERE cpf_cnpj = ?';
-      connection.query(query, [cpf_cnpj], async (err, results) => {
+      connection.query(query, [cpf_cnpj], (err, results) => {
         if (err) {
           console.error('Erro ao buscar o usuário no banco de dados:', err);
           return res.status(500).json({ success: false, message: 'Erro no servidor.' });
@@ -44,9 +43,8 @@ module.exports = (connection) => {
 
         const user = results[0];
 
-        // Comparar a senha fornecida com a senha armazenada
-        const passwordMatch = await bcrypt.compare(password, user.senha);
-        if (!passwordMatch) {
+        // Aqui, vamos comparar diretamente a senha, sem criptografia
+        if (user.senha !== password) {
           return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
         }
 
@@ -72,6 +70,8 @@ module.exports = (connection) => {
 
         // Exibe os usuários e senhas no console
         console.log('Usuários e senhas:', results);
+        
+        // Retorna os usuários e senhas como resposta
         res.json({ success: true, usuarios: results });
       });
     } catch (error) {
