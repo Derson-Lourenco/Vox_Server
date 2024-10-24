@@ -18,7 +18,7 @@ const authenticateToken = (req, res, next) => {
 // Rota principal exportada
 module.exports = (connection) => {
   // Rota de login
-  router.post('/login', [
+  router.post('/', [
     check('cpf_cnpj').isLength({ min: 11, max: 14 }).withMessage('CPF/CNPJ deve ter entre 11 e 14 caracteres'),
     check('senha').notEmpty().withMessage('Senha é obrigatória'),
   ], async (req, res) => {
