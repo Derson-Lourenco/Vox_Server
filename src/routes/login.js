@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs'); // Para hash de senhas
 const { check, validationResult } = require('express-validator');
 
 // Middleware para autenticação JWT
@@ -22,7 +23,6 @@ module.exports = (connection) => {
     check('cpf_cnpj').isLength({ min: 11, max: 14 }).withMessage('CPF/CNPJ deve ter entre 11 e 14 caracteres'),
     check('senha').notEmpty().withMessage('Senha é obrigatória'),
   ], async (req, res) => {
-    // Adiciona o console.log para visualizar os dados recebidos
     console.log('Dados recebidos para login:', req.body);
 
     const errors = validationResult(req);
@@ -46,13 +46,14 @@ module.exports = (connection) => {
 
         const user = results[0];
 
-        // Comparando a senha diretamente
-        if (user.senha !== senha) {
+        // Comparando a senha com bcrypt
+        const isPasswordValid = bcrypt.compareSync(senha, user.senha);
+        if (!isPasswordValid) {
           return res.status(401).json({ success: false, message: 'CPF/CNPJ ou senha incorretos.' });
         }
 
         // Gerar um token JWT
-        const token = jwt.sign({ cpf_cnpj: user.cpf_cnpj, role: user.role }, process.env.SECRET_KEY, { expiresIn: '1h' });
+        const token = jwt.sign({ cpf_cnpj: user.cpf_cnpj }, process.env.SECRET_KEY, { expiresIn: '1h' });
         return res.json({ success: true, token });
       });
     } catch (error) {
@@ -64,17 +65,14 @@ module.exports = (connection) => {
   // Rota para mostrar usuários e senhas (apenas para testes!)
   router.get('/usuarios', async (req, res) => {
     try {
-      const query = 'SELECT cpf_cnpj, senha FROM clientes'; // Altere os campos conforme necessário
+      const query = 'SELECT cpf_cnpj, senha FROM clientes';
       connection.query(query, (err, results) => {
         if (err) {
           console.error('Erro ao buscar usuários no banco de dados:', err);
           return res.status(500).json({ success: false, message: 'Erro no servidor.' });
         }
 
-        // Exibe os usuários e senhas no console
         console.log('Usuários e senhas:', results);
-        
-        // Retorna os usuários e senhas como resposta
         res.json({ success: true, usuarios: results });
       });
     } catch (error) {
@@ -85,10 +83,7 @@ module.exports = (connection) => {
 
   // Rota de Dashboard
   router.get('/dashboard', authenticateToken, (req, res) => {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Acesso negado, apenas administradores podem acessar esta rota.' });
-    }
-    res.json({ message: 'Bem-vindo ao dashboard do administrador!' });
+    res.json({ message: 'Bem-vindo ao dashboard!' });
   });
 
   return router;
