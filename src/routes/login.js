@@ -1,18 +1,16 @@
 const express = require('express');
-const jwt = require('jsonwebtoken'); // Para gerar tokens
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 
 module.exports = (connection) => {
-  // Função para gerar um token
   const gerarToken = (userId) => {
-    return jwt.sign({ id: userId }, 'seu_segredo_aqui', { expiresIn: '1h' }); // Use uma chave secreta segura
+    return jwt.sign({ id: userId }, 'seu_segredo_aqui', { expiresIn: '1h' });
   };
 
-  // Rota de login
   router.post('/getLogin', (req, res) => {
     const { email, senha } = req.body;
+    console.log('Requisição de login recebida com email:', email); // Adiciona o log para verificar o email recebido
 
-    // Consulta ao banco de dados para verificar as credenciais
     const query = 'SELECT * FROM usuarios WHERE email = ? AND senha = ?';
     connection.query(query, [email, senha], (err, results) => {
       if (err) {
@@ -21,11 +19,9 @@ module.exports = (connection) => {
       }
 
       if (results.length > 0) {
-        // Usuário encontrado, gera um token
-        const token = gerarToken(results[0].id); // Gera o token com o ID do usuário
-        return res.json({ token }); // Retorna o token
+        const token = gerarToken(results[0].id);
+        return res.json({ token });
       } else {
-        // Credenciais incorretas
         return res.status(401).json({ message: 'Email ou senha inválidos.' });
       }
     });
