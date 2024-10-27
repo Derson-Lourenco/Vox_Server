@@ -1,74 +1,74 @@
-const express = require('express');
-const router = express.Router();
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const { check, validationResult } = require('express-validator');
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importando useNavigate
+import axios from 'axios';
 
-// Middleware para autenticação JWT
-const authenticateToken = (req, res, next) => {
-  const token = req.headers['authorization'];
-  if (!token) return res.status(401).json({ message: 'Acesso negado, token não fornecido.' });
+const apiUrl = import.meta.env.VITE_API_URL;
 
-  jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
-    if (err) return res.status(403).json({ message: 'Token inválido.' });
-    req.user = user;
-    next();
-  });
-};
+const LoginForm = () => {
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate(); // Inicializando useNavigate
 
-module.exports = (connection) => {
-  // Rota de login
-  router.post('/getLogin', [
-    check('email').isEmail().withMessage('O e-mail deve ser válido.'),
-    check('senha').notEmpty().withMessage('Senha é obrigatória.'),
-  ], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, errors: errors.array() });
-    }
-
-    const { email, senha } = req.body;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(''); // Limpa a mensagem de erro antes de uma nova tentativa de login
 
     try {
-      const query = 'SELECT * FROM clientes WHERE email = ?';
-      connection.query(query, [email], async (err, results) => {
-        if (err) {
-          console.error('Erro ao buscar o usuário no banco de dados:', err);
-          return res.status(500).json({ success: false, message: 'Erro no servidor.' });
-        }
-
-        if (results.length === 0) {
-          return res.status(401).json({ success: false, message: 'E-mail ou senha incorretos.' });
-        }
-
-        const user = results[0];
-        const match = await bcrypt.compare(senha, user.senha);
-        
-        if (!match) {
-          return res.status(401).json({ success: false, message: 'E-mail ou senha incorretos.' });
-        }
-
-        const token = jwt.sign({ email: user.email, role: user.role }, process.env.SECRET_KEY, { expiresIn: '1h' });
-        return res.json({ success: true, token });
+      // Usando axios para fazer a requisição
+      const response = await axios.post(`${apiUrl}/login/getLogin`, {
+        email,
+        senha,
       });
-    } catch (error) {
-      console.error('Erro ao fazer login:', error);
-      return res.status(500).json({ success: false, message: 'Erro ao fazer login.' });
+
+      // Se o login for bem-sucedido
+      if (response.data && response.data.token) {
+        alert('Login realizado com sucesso!');
+        localStorage.setItem('token', response.data.token); // Armazena o token no localStorage
+        
+        // Redireciona para a página de dashboard
+        navigate('/dashboard'); // Alterando a rota para '/dashboard'
+      } else {
+        throw new Error('Token não encontrado na resposta.');
+      }
+      
+    } catch (err) {
+      console.error('Erro ao fazer login:', err.response?.data || err.message); // Log para depuração
+      setError(err.response?.data?.message || 'Erro ao fazer login. Verifique seu email e senha.');
     }
-  });
-
-  // Rota de Dashboard
-  router.get('/dashboard', authenticateToken, (req, res) => {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Acesso negado, apenas administradores podem acessar esta rota.' });
-    }
-    res.json({ message: 'Bem-vindo ao dashboard do administrador!' });
-  });
-
-  // Rota de teste para verificar se a API está funcionando
-  router.get('/teste', (req, res) => {
-    res.json({ message: 'API está funcionando corretamente!' });
-  });
-
-  return router;
+  };
+  
+  return (
+    <div style={{ maxWidth: '400px', margin: 'auto', padding: '20px', textAlign: 'center' }}>
+      <h2>Login</h2>
+      <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: '10px' }}>
+          <label style={{ display: 'block', marginBottom: '5px' }}>Email:</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+          />
+        </div>
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', marginBottom: '5px' }}>Senha:</label>
+          <input
+            type="password"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            required
+            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+          />
+        </div>
+        <button type="submit" style={{ padding: '10px 20px', borderRadius: '4px', backgroundColor: '#4CAF50', color: '#fff', border: 'none' }}>
+          Entrar
+        </button>
+        {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
+      </form>
+    </div>
+  );
 };
+
+export default LoginForm;

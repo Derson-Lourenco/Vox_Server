@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
 
 module.exports = (connection) => {
   router.post('/register', async (req, res) => {
@@ -11,10 +10,9 @@ module.exports = (connection) => {
     }
 
     try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-
+      // Remova o bcrypt e salve a senha diretamente
       const query = `INSERT INTO clientes (nome, cpf_cnpj, email, senha, role) VALUES (?, ?, ?, ?, ?)`;
-      connection.query(query, [nome, cpf_cnpj, email, hashedPassword, role], (err, result) => {
+      connection.query(query, [nome, cpf_cnpj, email, password, role], (err, result) => {
         if (err) {
           console.error('Erro ao registrar cliente:', err);
           return res.status(500).json({ error: 'Erro ao registrar cliente' });
@@ -22,8 +20,8 @@ module.exports = (connection) => {
         res.status(201).json({ message: 'Cliente registrado com sucesso!' });
       });
     } catch (error) {
-      console.error('Erro ao criptografar a senha:', error);
-      res.status(500).json({ error: 'Erro ao criptografar a senha' });
+      console.error('Erro ao registrar cliente:', error);
+      res.status(500).json({ error: 'Erro ao registrar cliente' });
     }
   });
 
