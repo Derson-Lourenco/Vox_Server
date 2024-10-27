@@ -11,7 +11,7 @@ module.exports = (connection) => {
     const { email, senha } = req.body;
     console.log('Requisição de login recebida com email:', email); // Adiciona o log para verificar o email recebido
 
-    const query = 'SELECT * FROM usuarios WHERE email = ? AND senha = ?';
+    const query = 'SELECT * FROM clientes WHERE email = ? AND senha = ?';
     connection.query(query, [email, senha], (err, results) => {
       if (err) {
         console.error('Erro na consulta ao banco:', err);
