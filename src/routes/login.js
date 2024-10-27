@@ -18,7 +18,7 @@ const authenticateToken = (req, res, next) => {
 
 module.exports = (connection) => {
   // Rota de login
-  router.post('/', [
+  router.post('/getLogin', [
     check('email').isEmail().withMessage('O e-mail deve ser válido.'),
     check('senha').notEmpty().withMessage('Senha é obrigatória.'),
   ], async (req, res) => {
