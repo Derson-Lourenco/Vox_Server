@@ -9,35 +9,35 @@
 
     // Rota para login
     // Rota para login
-router.post('/getLogin', (req, res) => {
-  const { email, senha } = req.body;
-  console.log('Requisição de login recebida com email:', email);
+    router.post('/getLogin', (req, res) => {
+      const { email, senha } = req.body;
+      console.log('Requisição de login recebida com email:', email);
 
-  const query = 'SELECT * FROM clientes WHERE email = ? AND senha = ?';
-  connection.query(query, [email, senha], (err, results) => {
-    if (err) {
-      console.error('Erro na consulta ao banco:', err);
-      return res.status(500).json({ message: 'Erro interno do servidor.' });
-    }
+      const query = 'SELECT * FROM clientes WHERE email = ? AND senha = ?';
+      connection.query(query, [email, senha], (err, results) => {
+        if (err) {
+          console.error('Erro na consulta ao banco:', err);
+          return res.status(500).json({ message: 'Erro interno do servidor.' });
+        }
 
-    if (results.length > 0) {
-      const user = results[0];
-      const token = gerarToken(user.id);
+        if (results.length > 0) {
+          const user = results[0];
+          const token = gerarToken(user.id);
 
-      // Armazenar o nome do usuário no localStorage
-      return res.json({
-        token,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        },
+          // Armazenar o nome do usuário no localStorage
+          return res.json({
+            token,
+            user: {
+              id: user.id,
+              nome: user.nome,
+              email: user.email,
+            },
+          });
+        } else {
+          return res.status(401).json({ message: 'Email ou senha inválidos.' });
+        }
       });
-    } else {
-      return res.status(401).json({ message: 'Email ou senha inválidos.' });
-    }
-  });
-});
+    });
 
 
     // Nova rota para buscar dados do usuário
