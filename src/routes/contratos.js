@@ -29,7 +29,8 @@ module.exports = connection => {
       dataInicio,
       dataFinalizacao,
       objetoContrato,
-      secretarias
+      secretarias,
+      cliente_id
     } = req.body
 
     const sql = `
@@ -45,8 +46,9 @@ module.exports = connection => {
         dataInicio,
         dataFinalizacao,
         objetoContrato,
-        secretarias
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        secretarias,
+        cliente_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `
 
     const values = [
@@ -61,7 +63,8 @@ module.exports = connection => {
       dataInicio,
       dataFinalizacao,
       objetoContrato,
-      secretarias
+      secretarias,
+      cliente_id
     ]
 
     connection.query(sql, values, (err, result) => {
@@ -112,7 +115,8 @@ module.exports = connection => {
       dataInicio,
       dataFinalizacao,
       objetoContrato,
-      secretarias
+      secretarias,
+      cliente_id
     } = req.body
 
     const sql = `
@@ -146,7 +150,8 @@ module.exports = connection => {
       dataFinalizacao,
       objetoContrato,
       secretarias,
-      id
+      id,
+      cliente_id
     ]
 
     connection.query(sql, values, (err, result) => {
