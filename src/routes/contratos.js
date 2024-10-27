@@ -1,5 +1,5 @@
-const express = require('express')
-const router = express.Router()
+const express = require('express');
+const router = express.Router();
 
 // Receba a conexão MySQL como argumento
 module.exports = connection => {
@@ -7,13 +7,13 @@ module.exports = connection => {
   router.get('/getContratos', (req, res) => {
     connection.query('SELECT * FROM contratos', (err, results) => {
       if (err) {
-        console.error('Erro ao obter contratos:', err)
-        res.status(500).json({ error: 'Erro interno do servidor' })
-        return
+        console.error('Erro ao obter contratos:', err);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+        return;
       }
-      res.status(200).json({ success: true, contratos: results })
-    })
-  })
+      res.status(200).json({ success: true, contratos: results });
+    });
+  });
   
   // Rota para salvar um novo contrato
   router.post('/salvarContrato', (req, res) => {
@@ -31,7 +31,7 @@ module.exports = connection => {
       objetoContrato,
       secretarias,
       cliente_id
-    } = req.body
+    } = req.body;
 
     const sql = `
       INSERT INTO contratos (
@@ -49,7 +49,7 @@ module.exports = connection => {
         secretarias,
         cliente_id
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `
+    `;
 
     const values = [
       processoAno,
@@ -65,44 +65,44 @@ module.exports = connection => {
       objetoContrato,
       secretarias,
       cliente_id
-    ]
+    ];
 
     connection.query(sql, values, (err, result) => {
       if (err) {
-        console.error('Erro ao salvar contrato:', err)
-        res.status(500).json({ error: 'Erro interno do servidor' })
-        return
+        console.error('Erro ao salvar contrato:', err);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+        return;
       }
-      res.status(201).json({ success: true, contratoId: result.insertId })
-    })
-  })
+      res.status(201).json({ success: true, contratoId: result.insertId });
+    });
+  });
 
   // Rota para excluir um contrato
   router.delete('/excluirContrato/:id', (req, res) => {
-    const id = req.params.id
+    const id = req.params.id;
 
     connection.query(
       'DELETE FROM contratos WHERE id = ?',
       [id],
       (err, result) => {
         if (err) {
-          console.error('Erro ao excluir contrato:', err)
-          res.status(500).json({ error: 'Erro interno do servidor' })
-          return
+          console.error('Erro ao excluir contrato:', err);
+          res.status(500).json({ error: 'Erro interno do servidor' });
+          return;
         }
 
         if (result.affectedRows > 0) {
-          res.status(200).json({ success: true })
+          res.status(200).json({ success: true });
         } else {
-          res.status(404).json({ error: 'Contrato não encontrado' })
+          res.status(404).json({ error: 'Contrato não encontrado' });
         }
       }
-    )
-  })
+    );
+  });
 
   // Rota para atualizar um contrato
   router.put('/atualizarContrato/:id', (req, res) => {
-    const id = req.params.id
+    const id = req.params.id;
     const {
       processoAno,
       numeroContrato,
@@ -117,7 +117,7 @@ module.exports = connection => {
       objetoContrato,
       secretarias,
       cliente_id
-    } = req.body
+    } = req.body;
 
     const sql = `
       UPDATE contratos
@@ -133,9 +133,10 @@ module.exports = connection => {
         dataInicio = ?,
         dataFinalizacao = ?,
         objetoContrato = ?,
-        secretarias = ?
+        secretarias = ?,
+        cliente_id = ?
       WHERE id = ?
-    `
+    `;
 
     const values = [
       processoAno,
@@ -150,24 +151,24 @@ module.exports = connection => {
       dataFinalizacao,
       objetoContrato,
       secretarias,
-      id,
-      cliente_id
-    ]
+      cliente_id,
+      id
+    ];
 
     connection.query(sql, values, (err, result) => {
       if (err) {
-        console.error('Erro ao atualizar contrato:', err)
-        res.status(500).json({ error: 'Erro interno do servidor' })
-        return
+        console.error('Erro ao atualizar contrato:', err);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+        return;
       }
 
       if (result.affectedRows > 0) {
-        res.status(200).json({ success: true })
+        res.status(200).json({ success: true });
       } else {
-        res.status(404).json({ error: 'Contrato não encontrado' })
+        res.status(404).json({ error: 'Contrato não encontrado' });
       }
-    })
-  })
+    });
+  });
 
   // Rota para obter detalhes de um contrato específico
   router.get('/detalheContrato/:id', (req, res) => {
@@ -186,6 +187,24 @@ module.exports = connection => {
     });
   });
 
+  // Rota para obter contratos por userId
+  router.get('/getContratosPorUsuario', (req, res) => {
+    const { userId } = req.query; // Obtém o userId da query string
 
-  return router
-}
+    // Verifica se o userId foi fornecido
+    if (!userId) {
+      return res.status(400).json({ error: 'userId é necessário' });
+    }
+
+    connection.query('SELECT * FROM contratos WHERE cliente_id = ?', [userId], (err, results) => {
+      if (err) {
+        console.error('Erro ao obter contratos:', err);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+        return;
+      }
+      res.status(200).json({ success: true, contratos: results });
+    });
+  });
+
+  return router;
+};
