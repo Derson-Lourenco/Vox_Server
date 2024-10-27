@@ -20,8 +20,16 @@ module.exports = (connection) => {
       }
 
       if (results.length > 0) {
-        const token = gerarToken(results[0].id);
-        return res.json({ token });
+        const user = results[0];
+        const token = gerarToken(user.id);
+        return res.json({
+          token,
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+          },
+        });
       } else {
         return res.status(401).json({ message: 'Email ou senha inválidos.' });
       }
@@ -53,7 +61,11 @@ module.exports = (connection) => {
 
         if (results.length > 0) {
           const user = results[0];
-          return res.json({ id: user.id, name: user.name, email: user.email }); // Retorna o que você precisa
+          return res.json({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+          }); // Retorna o que você precisa
         } else {
           return res.status(404).json({ message: 'Usuário não encontrado.' });
         }
