@@ -178,22 +178,27 @@ module.exports = connection => {
   });
 
   // Rota para obter contratos por cliente_id
+  // Rota para obter contratos por cliente_id
   router.get('/getContratosPorUsuario', (req, res) => {
     const { cliente_id } = req.query; // Obtém o cliente_id da query string
 
     // Verifica se o cliente_id foi fornecido
     if (!cliente_id) {
-      return res.status(400).json({ error: 'cliente_id é necessário' });
+        console.error('cliente_id não fornecido');
+        return res.status(400).json({ error: 'cliente_id é necessário' });
     }
 
+    console.log('cliente_id recebido:', cliente_id); // Log para depuração
+
     connection.query('SELECT * FROM contratos WHERE cliente_id = ?', [cliente_id], (err, results) => {
-      if (err) {
-        console.error('Erro ao obter contratos:', err);
-        return res.status(500).json({ error: 'Erro interno do servidor' });
-      }
-      res.status(200).json({ success: true, contratos: results });
+        if (err) {
+            console.error('Erro ao obter contratos:', err);
+            return res.status(500).json({ error: 'Erro interno do servidor' });
+        }
+        res.status(200).json({ success: true, contratos: results });
     });
   });
+
 
   return router;
 };
