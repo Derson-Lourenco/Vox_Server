@@ -1,20 +1,19 @@
 const express = require('express');
 const router = express.Router();
 
-// Receba a conexão MySQL como argumento
+// Recebe a conexão MySQL como argumento
 module.exports = connection => {
-  // Rota para obter detalhes dos contratos
+  // Rota para obter todos os contratos
   router.get('/getContratos', (req, res) => {
     connection.query('SELECT * FROM contratos', (err, results) => {
       if (err) {
         console.error('Erro ao obter contratos:', err);
-        res.status(500).json({ error: 'Erro interno do servidor' });
-        return;
+        return res.status(500).json({ error: 'Erro interno do servidor' });
       }
       res.status(200).json({ success: true, contratos: results });
     });
   });
-  
+
   // Rota para salvar um novo contrato
   router.post('/salvarContrato', (req, res) => {
     const {
@@ -70,8 +69,7 @@ module.exports = connection => {
     connection.query(sql, values, (err, result) => {
       if (err) {
         console.error('Erro ao salvar contrato:', err);
-        res.status(500).json({ error: 'Erro interno do servidor' });
-        return;
+        return res.status(500).json({ error: 'Erro interno do servidor' });
       }
       res.status(201).json({ success: true, contratoId: result.insertId });
     });
@@ -81,23 +79,18 @@ module.exports = connection => {
   router.delete('/excluirContrato/:id', (req, res) => {
     const id = req.params.id;
 
-    connection.query(
-      'DELETE FROM contratos WHERE id = ?',
-      [id],
-      (err, result) => {
-        if (err) {
-          console.error('Erro ao excluir contrato:', err);
-          res.status(500).json({ error: 'Erro interno do servidor' });
-          return;
-        }
-
-        if (result.affectedRows > 0) {
-          res.status(200).json({ success: true });
-        } else {
-          res.status(404).json({ error: 'Contrato não encontrado' });
-        }
+    connection.query('DELETE FROM contratos WHERE id = ?', [id], (err, result) => {
+      if (err) {
+        console.error('Erro ao excluir contrato:', err);
+        return res.status(500).json({ error: 'Erro interno do servidor' });
       }
-    );
+
+      if (result.affectedRows > 0) {
+        res.status(200).json({ success: true });
+      } else {
+        res.status(404).json({ error: 'Contrato não encontrado' });
+      }
+    });
   });
 
   // Rota para atualizar um contrato
@@ -158,8 +151,7 @@ module.exports = connection => {
     connection.query(sql, values, (err, result) => {
       if (err) {
         console.error('Erro ao atualizar contrato:', err);
-        res.status(500).json({ error: 'Erro interno do servidor' });
-        return;
+        return res.status(500).json({ error: 'Erro interno do servidor' });
       }
 
       if (result.affectedRows > 0) {
@@ -174,33 +166,30 @@ module.exports = connection => {
   router.get('/detalheContrato/:id', (req, res) => {
     const { id } = req.params;
     connection.query('SELECT * FROM contratos WHERE id = ?', [id], (err, result) => {
-        if (err) {
-            console.error('Erro ao buscar contrato:', err);
-            res.status(500).json({ error: 'Erro interno do servidor' });
-            return;
-        }
-        if (result.length === 0) {
-            res.status(404).json({ error: 'Contrato não encontrado' });
-        } else {
-            res.status(200).json({ success: true, contrato: result[0] });
-        }
+      if (err) {
+        console.error('Erro ao buscar contrato:', err);
+        return res.status(500).json({ error: 'Erro interno do servidor' });
+      }
+      if (result.length === 0) {
+        return res.status(404).json({ error: 'Contrato não encontrado' });
+      }
+      res.status(200).json({ success: true, contrato: result[0] });
     });
   });
 
-  // Rota para obter contratos por userId
+  // Rota para obter contratos por cliente_id
   router.get('/getContratosPorUsuario', (req, res) => {
-    const { userId } = req.query; // Obtém o userId da query string
+    const { cliente_id } = req.query; // Obtém o cliente_id da query string
 
-    // Verifica se o userId foi fornecido
-    if (!userId) {
-      return res.status(400).json({ error: 'userId é necessário' });
+    // Verifica se o cliente_id foi fornecido
+    if (!cliente_id) {
+      return res.status(400).json({ error: 'cliente_id é necessário' });
     }
 
-    connection.query('SELECT * FROM contratos WHERE cliente_id = ?', [userId], (err, results) => {
+    connection.query('SELECT * FROM contratos WHERE cliente_id = ?', [cliente_id], (err, results) => {
       if (err) {
         console.error('Erro ao obter contratos:', err);
-        res.status(500).json({ error: 'Erro interno do servidor' });
-        return;
+        return res.status(500).json({ error: 'Erro interno do servidor' });
       }
       res.status(200).json({ success: true, contratos: results });
     });
