@@ -4,8 +4,10 @@ const router = express.Router();
 // Recebe a conexão MySQL como argumento
 module.exports = connection => {
   // Rota para obter todos os contratos
-  router.get('/getContratos', (req, res) => {
-    connection.query('SELECT * FROM contratos', (err, results) => {
+  // Rota para obter contratos do usuário logado
+  router.get('/getContratos/:userId', (req, res) => {
+    const userId = req.params.userId; // Pega o ID do usuário da URL
+    connection.query('SELECT * FROM contratos WHERE cliente_id = ?', [userId], (err, results) => {
       if (err) {
         console.error('Erro ao obter contratos:', err);
         return res.status(500).json({ error: 'Erro interno do servidor' });
@@ -13,6 +15,7 @@ module.exports = connection => {
       res.status(200).json({ success: true, contratos: results });
     });
   });
+
 
   // Rota para salvar um novo contrato
   router.post('/salvarContrato', (req, res) => {
@@ -177,28 +180,6 @@ module.exports = connection => {
     });
   });
 
-  // Rota para obter contratos por cliente_id
-  // Rota para obter contratos por cliente_id
-  router.get('/getContratosPorUsuario', (req, res) => {
-    const { cliente_id } = req.query; // Obtém o cliente_id da query string
-
-    // Verifica se o cliente_id foi fornecido
-    if (!cliente_id) {
-        console.error('cliente_id não fornecido');
-        return res.status(400).json({ error: 'cliente_id é necessário' });
-    }
-
-    console.log('cliente_id recebido:', cliente_id); // Log para depuração
-
-    connection.query('SELECT * FROM contratos WHERE cliente_id = ?', [cliente_id], (err, results) => {
-        if (err) {
-            console.error('Erro ao obter contratos:', err);
-            return res.status(500).json({ error: 'Erro interno do servidor' });
-        }
-        res.status(200).json({ success: true, contratos: results });
-    });
-  });
-
-
+  
   return router;
 };
