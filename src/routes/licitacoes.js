@@ -9,7 +9,7 @@ module.exports = (connection) => {
     try {
       console.log('Entrou na rota GET /'); // Log indicando que a rota foi acessada
 
-      const id_usuario = req.query.id_usuario; // Obter o ID do usuário da query string
+      const id_usuario = req.params.id_usuario; // Corrigir: obter o ID do usuário dos parâmetros da URL
       if (!id_usuario) {
         return res.status(400).json({ error: 'ID do usuário é obrigatório.' });
       }
