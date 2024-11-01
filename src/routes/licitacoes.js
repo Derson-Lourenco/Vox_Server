@@ -3,25 +3,17 @@ const axios = require('axios')
 
 const router = express.Router()
 
+// Lista fixa de IDs predefinidos
+const idsPredefinidos = ['129', '1478'] // IDs fixos para teste
+
 module.exports = connection => {
   // Rota para buscar licitações
   router.get('/', async (req, res) => {
     try {
       console.log('Entrou na rota GET /') // Log indicando que a rota foi acessada
 
-      const userId = req.query.userId; // Obter o ID do usuário da query string
-
-      // 1. Buscar os municípios associados ao usuário no banco de dados
-      const [municipios] = await connection.query('SELECT municipio_id FROM municipios_usuario WHERE id_usuario = ?', [userId]);
-      
-      if (municipios.length === 0) {
-        return res.status(404).json({ message: 'Nenhum município encontrado para o usuário.' });
-      }
-
-      const idsMunicipios = municipios.map(municipio => municipio.municipio_id); // Extrair os IDs dos municípios
-
-      // 2. Obter as licitações para cada ID de município
-      const licitacoesPromises = idsMunicipios.map(async idUnidadeGestora => {
+      // 1. Obter as licitações para cada ID predefinido
+      const licitacoesPromises = idsPredefinidos.map(async idUnidadeGestora => {
         console.log(`Buscando licitações para ID: ${idUnidadeGestora}`) // Log para cada ID
 
         const licitacoesResponse = await axios.get(
@@ -36,7 +28,7 @@ module.exports = connection => {
 
       console.log('Resultados de licitações:', licitacoesResults) // Log dos resultados obtidos
 
-      // 3. Buscar detalhes para cada licitação
+      // 2. Buscar detalhes para cada licitação
       const detalhesPromises = licitacoesResults.flatMap(
         ({ idUnidadeGestora, licitacoes }) =>
           licitacoes.map(async licitacao => {
@@ -57,7 +49,7 @@ module.exports = connection => {
 
       console.log('Detalhes combinados:', detalhesFlattened) // Log dos detalhes finais
 
-      // Retornar os dados combinados
+      // Retornar os dados combinados twse
       res.json(detalhesFlattened)
     } catch (error) {
       console.error('Erro ao buscar dados:', error.message)
