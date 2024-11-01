@@ -5,19 +5,19 @@ const router = express.Router();
 
 module.exports = (connection) => {
   // Rota para buscar licitações
-  router.get('/buscar', async (req, res) => {
+  router.get('/buscar:id_usuario', async (req, res) => {
     try {
       console.log('Entrou na rota GET /'); // Log indicando que a rota foi acessada
 
-      const userid = req.query.userid; // Obter o ID do usuário da query string
-      if (!userid) {
+      const id_usuario = req.query.id_usuario; // Obter o ID do usuário da query string
+      if (!id_usuario) {
         return res.status(400).json({ error: 'ID do usuário é obrigatório.' });
       }
 
       // 1. Buscar municípios associados ao ID do usuário
       const [municipios] = await connection.execute(
         'SELECT municipio_id FROM municipios_usuario WHERE id_usuario = ?',
-        [userid]
+        [id_usuario]
       );
 
       if (municipios.length === 0) {
