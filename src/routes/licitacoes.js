@@ -9,15 +9,15 @@ module.exports = (connection) => {
     try {
       console.log('Entrou na rota GET /'); // Log indicando que a rota foi acessada
 
-      const idUsuario = req.query.idUsuario; // Obter o ID do usuário da query string
-      if (!idUsuario) {
+      const userid = req.query.userid; // Obter o ID do usuário da query string
+      if (!userid) {
         return res.status(400).json({ error: 'ID do usuário é obrigatório.' });
       }
 
       // 1. Buscar municípios associados ao ID do usuário
       const [municipios] = await connection.execute(
         'SELECT municipio_id FROM municipios_usuario WHERE id_usuario = ?',
-        [idUsuario]
+        [userid]
       );
 
       if (municipios.length === 0) {
