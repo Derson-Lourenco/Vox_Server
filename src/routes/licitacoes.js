@@ -7,9 +7,11 @@ module.exports = (connection) => {
   // Rota para buscar licitações
   router.get('/buscar/:id_usuario', async (req, res) => {
     try {
-      console.log('Entrou na rota GET /'); // Log indicando que a rota foi acessada
+      console.log('Entrou na rota GET /buscar/:id_usuario'); // Log indicando que a rota foi acessada
 
-      const id_usuario = req.query.id_usuario; // Obter o ID do usuário da query string
+      const id_usuario = req.params.id_usuario; // Obter o ID do usuário da rota
+      console.log(`ID do usuário recebido: ${id_usuario}`); // Log do ID do usuário
+
       if (!id_usuario) {
         return res.status(400).json({ error: 'ID do usuário é obrigatório.' });
       }
@@ -24,6 +26,8 @@ module.exports = (connection) => {
         return res.status(404).json({ message: 'Nenhum município encontrado para o usuário.' });
       }
 
+      console.log(`Municípios encontrados para o usuário ${id_usuario}:`, municipios); // Log dos municípios encontrados
+
       // 2. Obter as licitações para cada município encontrado
       const licitacoesPromises = municipios.map(async ({ municipio_id }) => {
         console.log(`Buscando licitações para município ID: ${municipio_id}`); // Log para cada ID
@@ -37,7 +41,6 @@ module.exports = (connection) => {
       });
 
       const licitacoesResults = await Promise.all(licitacoesPromises);
-
       console.log('Resultados de licitações:', licitacoesResults); // Log dos resultados obtidos
 
       // 3. Buscar detalhes para cada licitação
@@ -68,5 +71,6 @@ module.exports = (connection) => {
       res.status(500).json({ error: 'Erro ao buscar dados.' });
     }
   });
+
   return router; // Retorne o router aqui
 };
