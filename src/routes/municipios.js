@@ -53,6 +53,26 @@ const createMunicipiosRouter = (connection) => {
     }
   });
 
+  router.get('/salvos/:id_usuario', async (req, res) => {
+    const id_usuario = req.params.id_usuario;
+  
+    try {
+      const query = 'SELECT municipio_id FROM municipios_usuario WHERE id_usuario = ?';
+      connection.query(query, [id_usuario], (error, results) => {
+        if (error) {
+          console.error('Erro ao buscar municípios salvos:', error);
+          return res.status(500).json({ message: 'Erro ao buscar municípios salvos' });
+        }
+  
+        res.status(200).json(results);
+      });
+    } catch (error) {
+      console.error('Erro ao buscar municípios salvos:', error.message);
+      res.status(500).json({ message: 'Erro ao buscar municípios salvos' });
+    }
+  });
+  
+
   return router;
 };
 
