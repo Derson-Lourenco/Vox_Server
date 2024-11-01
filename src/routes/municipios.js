@@ -27,6 +27,7 @@ const createMunicipiosRouter = (connection) => {
   });
 
   // Rota para salvar municípios selecionados com o ID do usuário
+ // Rota para salvar municípios selecionados com o ID do usuário
   router.post('/salvar-prefeituras', async (req, res) => {
     const { municipios, id_usuario } = req.body;
 
@@ -35,24 +36,43 @@ const createMunicipiosRouter = (connection) => {
     }
 
     try {
-      const values = municipios.map(municipio => [municipio.municipio_id, municipio.nome_municipio, id_usuario]);
-
-      const query = 'INSERT INTO municipios_usuario (municipio_id, nome_municipio, id_usuario) VALUES ?';
-
-      connection.query(query, [values], (error, results) => {
+      // Verifique se os municípios já estão salvos para o usuário
+      const idsMunicipios = municipios.map(municipio => municipio.municipio_id);
+      const queryVerificacao = 'SELECT municipio_id FROM municipios_usuario WHERE municipio_id IN (?) AND id_usuario = ?';
+      
+      connection.query(queryVerificacao, [idsMunicipios, id_usuario], (error, results) => {
         if (error) {
-          console.error('Erro ao inserir municípios:', error);
-          return res.status(500).json({ message: 'Erro ao salvar municípios' });
+          console.error('Erro ao verificar municípios:', error);
+          return res.status(500).json({ message: 'Erro ao verificar municípios' });
         }
 
-        res.status(200).json({ message: 'Municípios salvos com sucesso!' });
+        const municipiosExistentes = results.map(row => row.municipio_id);
+        const municipiosNovos = municipios.filter(municipio => !municipiosExistentes.includes(municipio.municipio_id));
+
+        // Se não houver novos municípios, retorne uma mensagem apropriada
+        if (municipiosNovos.length === 0) {
+          return res.status(409).json({ message: 'Todos os municípios já estão salvos para este usuário.' });
+        }
+
+        const values = municipiosNovos.map(municipio => [municipio.municipio_id, municipio.nome_municipio, id_usuario]);
+        const queryInsercao = 'INSERT INTO municipios_usuario (municipio_id, nome_municipio, id_usuario) VALUES ?';
+
+        connection.query(queryInsercao, [values], (error, results) => {
+          if (error) {
+            console.error('Erro ao inserir municípios:', error);
+            return res.status(500).json({ message: 'Erro ao salvar municípios' });
+          }
+
+          res.status(200).json({ message: 'Municípios salvos com sucesso!' });
+        });
       });
     } catch (error) {
       console.error('Erro ao salvar municípios:', error.message);
       res.status(500).json({ message: 'Erro ao salvar municípios' });
     }
   });
-  
+
+
   router.post('/remover-prefeituras', async (req, res) => {
     const { municipios, id_usuario } = req.body;
   
