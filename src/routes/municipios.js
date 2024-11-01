@@ -25,7 +25,20 @@ const createMunicipiosRouter = (connection) => {
       res.status(500).json({ message: 'Erro ao buscar municípios', error: error.message });
     }
   });
+  // Exemplo de rota para buscar municípios salvos
+  router.get('/municipios/salvos/:id_usuario', (req, res) => {
+    const { id_usuario } = req.params;
 
+    const query = 'SELECT municipio_id, nome_municipio FROM municipios_usuario WHERE id_usuario = ?';
+    
+    connection.query(query, [id_usuario], (error, results) => {
+      if (error) {
+        console.error('Erro ao buscar municípios salvos:', error);
+        return res.status(500).json({ message: 'Erro ao buscar municípios salvos' });
+      }
+      res.status(200).json(results);
+    });
+  });
   // Rota para salvar municípios selecionados com o ID do usuário
   router.post('/salvar-prefeituras', async (req, res) => {
     const { municipios, id_usuario } = req.body;
