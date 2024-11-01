@@ -52,7 +52,30 @@ const createMunicipiosRouter = (connection) => {
       res.status(500).json({ message: 'Erro ao salvar municípios' });
     }
   });
-
+  
+  router.post('/remover-prefeituras', async (req, res) => {
+    const { municipios, id_usuario } = req.body;
+  
+    if (!municipios || !Array.isArray(municipios) || !id_usuario) {
+      return res.status(400).json({ message: 'Dados inválidos' });
+    }
+  
+    try {
+      const query = 'DELETE FROM municipios_usuario WHERE municipio_id IN (?) AND id_usuario = ?';
+      connection.query(query, [municipios, id_usuario], (error, results) => {
+        if (error) {
+          console.error('Erro ao remover municípios:', error);
+          return res.status(500).json({ message: 'Erro ao remover municípios' });
+        }
+  
+        res.status(200).json({ message: 'Municípios removidos com sucesso!' });
+      });
+    } catch (error) {
+      console.error('Erro ao remover municípios:', error.message);
+      res.status(500).json({ message: 'Erro ao remover municípios' });
+    }
+  });
+  
   router.get('/salvos/:id_usuario', async (req, res) => {
     const id_usuario = req.params.id_usuario;
   
