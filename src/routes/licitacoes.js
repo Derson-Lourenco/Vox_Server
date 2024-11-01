@@ -1,61 +1,78 @@
-const express = require('express')
-const axios = require('axios')
+// api.js (ou o arquivo onde você define as rotas)
+const express = require('express');
+const axios = require('axios');
 
-const router = express.Router()
+const router = express.Router();
 
-// Lista fixa de IDs predefinidos
-const idsPredefinidos = ['129', '1478'] // IDs fixos para teste
+module.exports = (connection) => {
+  // Rota para buscar os municípios do usuário logado
+  router.get('/municipios', async (req, res) => {
+    const userId = req.user.id; // Supondo que você tenha uma forma de acessar o ID do usuário logado
 
-module.exports = connection => {
-  // Rota para buscar licitações
-  router.get('/', async (req, res) => {
     try {
-      console.log('Entrou na rota GET /') // Log indicando que a rota foi acessada
+      const [rows] = await connection.execute(
+        'SELECT municipio_id FROM municipios_usuario WHERE id_usuario = ?',
+        [userId]
+      );
+      
+      const municipioIds = rows.map(row => row.municipio_id);
+      res.json(municipioIds);
+    } catch (error) {
+      console.error('Erro ao buscar municípios do usuário:', error.message);
+      res.status(500).json({ error: 'Erro ao buscar municípios do usuário.' });
+    }
+  });
 
-      // 1. Obter as licitações para cada ID predefinido
+  // Rota para buscar licitações
+  router.get('/licitacoes', async (req, res) => {
+    try {
+      console.log('Entrou na rota GET /licitacoes');
+
+      // 1. Obter os IDs dos municípios do usuário
+      const response = await axios.get(`${req.protocol}://${req.get('host')}/municipios`);
+      const idsPredefinidos = response.data;
+
+      // 2. Obter as licitações para cada ID de município
       const licitacoesPromises = idsPredefinidos.map(async idUnidadeGestora => {
-        console.log(`Buscando licitações para ID: ${idUnidadeGestora}`) // Log para cada ID
+        console.log(`Buscando licitações para ID: ${idUnidadeGestora}`);
 
         const licitacoesResponse = await axios.get(
           `https://sistemas.tce.pi.gov.br/api/portaldacidadania/licitacoes/${idUnidadeGestora}`
-        )
+        );
 
-        console.log(`Licitações recebidas para ID: ${idUnidadeGestora}`, licitacoesResponse.data) // Log das licitações recebidas
-        return { idUnidadeGestora, licitacoes: licitacoesResponse.data }
-      })
+        console.log(`Licitações recebidas para ID: ${idUnidadeGestora}`, licitacoesResponse.data);
+        return { idUnidadeGestora, licitacoes: licitacoesResponse.data };
+      });
 
-      const licitacoesResults = await Promise.all(licitacoesPromises)
+      const licitacoesResults = await Promise.all(licitacoesPromises);
+      console.log('Resultados de licitações:', licitacoesResults);
 
-      console.log('Resultados de licitações:', licitacoesResults) // Log dos resultados obtidos
-
-      // 2. Buscar detalhes para cada licitação
+      // 3. Buscar detalhes para cada licitação
       const detalhesPromises = licitacoesResults.flatMap(
         ({ idUnidadeGestora, licitacoes }) =>
           licitacoes.map(async licitacao => {
-            console.log(`Buscando detalhes para licitação ${licitacao.id} do ID ${idUnidadeGestora}`) // Log para cada detalhe de licitação
+            console.log(`Buscando detalhes para licitação ${licitacao.id} do ID ${idUnidadeGestora}`);
 
-            const formattedDate = licitacao.data.split('T')[0].replace(/-/g, '') // Formatar data para AAAAMMDD
+            const formattedDate = licitacao.data.split('T')[0].replace(/-/g, '');
             const detalhesResponse = await axios.get(
               `https://sistemas.tce.pi.gov.br/api/portaldacidadania/licitacoes/${idUnidadeGestora}/1/${formattedDate}`
-            )
+            );
 
-            console.log(`Detalhes recebidos para licitação ${licitacao.id}`, detalhesResponse.data) // Log dos detalhes recebidos
-            return detalhesResponse.data
+            console.log(`Detalhes recebidos para licitação ${licitacao.id}`, detalhesResponse.data);
+            return detalhesResponse.data;
           })
-      )
+      );
 
-      const detalhesArray = await Promise.all(detalhesPromises)
-      const detalhesFlattened = detalhesArray.flat()
+      const detalhesArray = await Promise.all(detalhesPromises);
+      const detalhesFlattened = detalhesArray.flat();
+      console.log('Detalhes combinados:', detalhesFlattened);
 
-      console.log('Detalhes combinados:', detalhesFlattened) // Log dos detalhes finais
-
-      // Retornar os dados combinados twse
-      res.json(detalhesFlattened)
+      res.json(detalhesFlattened);
     } catch (error) {
-      console.error('Erro ao buscar dados:', error.message)
-      res.status(500).json({ error: 'Erro ao buscar dados.' })
+      console.error('Erro ao buscar dados:', error.message);
+      res.status(500).json({ error: 'Erro ao buscar dados.' });
     }
-  })
+  });
 
-  return router // Retorne o router aqui
-}
+  return router;
+};
