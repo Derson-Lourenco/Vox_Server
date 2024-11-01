@@ -5,7 +5,7 @@ const router = express.Router();
 
 module.exports = (connection) => {
   // Rota para buscar licitações
-  router.get('/', async (req, res) => {
+  router.get('/buscar', async (req, res) => {
     try {
       console.log('Entrou na rota GET /'); // Log indicando que a rota foi acessada
 
