@@ -7,7 +7,7 @@ const router = express.Router();
 module.exports = connection => {
   // Rota para buscar licitações
   router.get('/:id_usuario', async (req, res) => {
-    const idUsuario = req.params.id_usuario; // ID do usuário vindo da requisição
+    const idUsuario = 11// ID do usuário vindo da requisição
 
     try {
       console.log('Entrou na rota GET /');
