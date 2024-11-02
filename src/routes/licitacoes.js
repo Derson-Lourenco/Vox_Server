@@ -6,7 +6,7 @@ const router = express.Router();
 // Função para criar a rota, aceitando a conexão com o banco de dados
 module.exports = connection => {
   // Rota para buscar licitações
-  router.get('/:id_usuario', async (req, res) => {
+  router.get('/', async (req, res) => {
     const idUsuario = 11// ID do usuário vindo da requisição
 
     try {
