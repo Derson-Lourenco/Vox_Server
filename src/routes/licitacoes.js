@@ -1,61 +1,79 @@
-const express = require('express')
-const axios = require('axios')
+const express = require('express');
+const axios = require('axios');
 
-const router = express.Router()
+const router = express.Router();
 
-// Lista fixa de IDs predefinidos
-const idsPredefinidos = ['129', '1478'] // IDs fixos para teste
-
+// Função para criar a rota, aceitando a conexão com o banco de dados
 module.exports = connection => {
   // Rota para buscar licitações
   router.get('/', async (req, res) => {
+    const idUsuario = req.query.idUsuario; // Agora pega do frontend
     try {
-      console.log('Entrou na rota GET /') // Log indicando que a rota foi acessada
+      console.log('Entrou na rota GET /');
 
-      // 1. Obter as licitações para cada ID predefinido
-      const licitacoesPromises = idsPredefinidos.map(async idUnidadeGestora => {
-        console.log(`Buscando licitações para ID: ${idUnidadeGestora}`) // Log para cada ID
+      // 1. Consultar o banco de dados para obter os municipio_id com base no id_usuario
+      connection.query(
+        'SELECT municipio_id FROM municipios_usuario WHERE id_usuario = ?',
+        [idUsuario],
+        async (error, results) => {
+          if (error) {
+            console.error('Erro ao buscar IDs dos municípios:', error);
+            return res.status(500).json({ error: 'Erro ao buscar IDs dos municípios' });
+          }
 
-        const licitacoesResponse = await axios.get(
-          `https://sistemas.tce.pi.gov.br/api/portaldacidadania/licitacoes/${idUnidadeGestora}`
-        )
+          // Verifica se encontrou resultados
+          if (results.length === 0) {
+            return res.status(404).json({ error: 'Nenhum município encontrado para este usuário' });
+          }
 
-        console.log(`Licitações recebidas para ID: ${idUnidadeGestora}`, licitacoesResponse.data) // Log das licitações recebidas
-        return { idUnidadeGestora, licitacoes: licitacoesResponse.data }
-      })
+          // Extrai os municipio_id dos resultados
+          const idsPredefinidos = results.map(row => row.municipio_id);
 
-      const licitacoesResults = await Promise.all(licitacoesPromises)
+          // 2. Obter as licitações para cada ID predefinido
+          const licitacoesPromises = idsPredefinidos.map(async idUnidadeGestora => {
+            console.log(`Buscando licitações para ID: ${idUnidadeGestora}`); // Log para cada ID
 
-      console.log('Resultados de licitações:', licitacoesResults) // Log dos resultados obtidos
+            const licitacoesResponse = await axios.get(
+              `https://sistemas.tce.pi.gov.br/api/portaldacidadania/licitacoes/${idUnidadeGestora}`
+            );
 
-      // 2. Buscar detalhes para cada licitação
-      const detalhesPromises = licitacoesResults.flatMap(
-        ({ idUnidadeGestora, licitacoes }) =>
-          licitacoes.map(async licitacao => {
-            console.log(`Buscando detalhes para licitação ${licitacao.id} do ID ${idUnidadeGestora}`) // Log para cada detalhe de licitação
+            console.log(`Licitações recebidas para ID: ${idUnidadeGestora}`, licitacoesResponse.data); // Log das licitações recebidas
+            return { idUnidadeGestora, licitacoes: licitacoesResponse.data };
+          });
 
-            const formattedDate = licitacao.data.split('T')[0].replace(/-/g, '') // Formatar data para AAAAMMDD
-            const detalhesResponse = await axios.get(
-              `https://sistemas.tce.pi.gov.br/api/portaldacidadania/licitacoes/${idUnidadeGestora}/1/${formattedDate}`
-            )
+          const licitacoesResults = await Promise.all(licitacoesPromises);
+          console.log('Resultados de licitações:', licitacoesResults); // Log dos resultados obtidos
 
-            console.log(`Detalhes recebidos para licitação ${licitacao.id}`, detalhesResponse.data) // Log dos detalhes recebidos
-            return detalhesResponse.data
-          })
-      )
+          // 3. Buscar detalhes para cada licitação
+          const detalhesPromises = licitacoesResults.flatMap(
+            ({ idUnidadeGestora, licitacoes }) =>
+              licitacoes.map(async licitacao => {
+                console.log(`Buscando detalhes para licitação ${licitacao.id} do ID ${idUnidadeGestora}`); // Log para cada detalhe de licitação
 
-      const detalhesArray = await Promise.all(detalhesPromises)
-      const detalhesFlattened = detalhesArray.flat()
+                const formattedDate = licitacao.data.split('T')[0].replace(/-/g, ''); // Formatar data para AAAAMMDD
+                const detalhesResponse = await axios.get(
+                  `https://sistemas.tce.pi.gov.br/api/portaldacidadania/licitacoes/${idUnidadeGestora}/1/${formattedDate}`
+                );
 
-      console.log('Detalhes combinados:', detalhesFlattened) // Log dos detalhes finais
+                console.log(`Detalhes recebidos para licitação ${licitacao.id}`, detalhesResponse.data); // Log dos detalhes recebidos
+                return detalhesResponse.data;
+              })
+          );
 
-      // Retornar os dados combinados twse
-      res.json(detalhesFlattened)
+          const detalhesArray = await Promise.all(detalhesPromises);
+          const detalhesFlattened = detalhesArray.flat();
+
+          console.log('Detalhes combinados:', detalhesFlattened); // Log dos detalhes finais
+
+          // Retornar os dados combinados
+          res.json(detalhesFlattened);
+        }
+      );
     } catch (error) {
-      console.error('Erro ao buscar dados:', error.message)
-      res.status(500).json({ error: 'Erro ao buscar dados.' })
+      console.error('Erro ao buscar dados:', error.message);
+      res.status(500).json({ error: 'Erro ao buscar dados.' });
     }
-  })
+  });
 
-  return router // Retorne o router aqui
-}
+  return router;
+};
