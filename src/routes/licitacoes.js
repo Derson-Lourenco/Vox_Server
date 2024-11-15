@@ -145,6 +145,29 @@
       });
     });
     
+    // Rota para obter a quantidade de licitações salvas por usuário
+  router.get('/quantidadeSalvas/:idUsuario', (req, res) => {
+    const { idUsuario } = req.params;
+
+    if (!idUsuario) {
+      return res.status(400).json({ error: 'Parâmetro idUsuario é necessário.' });
+    }
+
+    const query = 'SELECT COUNT(*) AS quantidade FROM licitacoes_salvas WHERE id_usuario = ?';
+    connection.query(query, [idUsuario], (error, results) => {
+      if (error) {
+        console.error('Erro ao contar licitações salvas:', error);
+        return res.status(500).json({ error: 'Erro ao contar licitações salvas.' });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'Nenhuma licitação salva encontrada para este usuário.' });
+      }
+
+      res.json({ quantidade: results[0].quantidade });
+    });
+  });
+
 
       return router;
     };
