@@ -76,7 +76,7 @@ module.exports = connection => {
   });
 
   // Rota para salvar licitação
-  router.post('/salvar-licitacao', (req, res) => {
+  router.post('/salvar_licitacao', (req, res) => {
     const { idUsuario, orgao, modalidade, valorPrevisto, data, link } = req.body;
 
     if (!idUsuario || !orgao || !modalidade || !valorPrevisto || !data || !link) {
