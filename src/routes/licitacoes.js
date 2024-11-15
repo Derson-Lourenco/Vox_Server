@@ -75,5 +75,37 @@ module.exports = connection => {
     }
   });
 
+  // Rota para salvar licitação
+  router.post('/salvar-licitacao', (req, res) => {
+    const { idUsuario, orgao, modalidade, valorPrevisto, data, link } = req.body;
+
+    if (!idUsuario || !orgao || !modalidade || !valorPrevisto || !data || !link) {
+      return res.status(400).json({ error: 'Dados incompletos.' });
+    }
+
+    const query = `
+      INSERT INTO licitacoes_salvas (id_usuario, orgao, modalidade, valor_previsto, data, link)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    connection.query(query, [idUsuario, orgao, modalidade, valorPrevisto, data, link], (error, results) => {
+      if (error) {
+        console.error('Erro ao salvar licitação:', error);
+        return res.status(500).json({ error: 'Erro ao salvar licitação.' });
+      }
+
+      // Retorna todas as licitações salvas
+      const selectQuery = 'SELECT * FROM licitacoes_salvas WHERE id_usuario = ?';
+      connection.query(selectQuery, [idUsuario], (selectError, selectResults) => {
+        if (selectError) {
+          console.error('Erro ao buscar licitações salvas:', selectError);
+          return res.status(500).json({ error: 'Erro ao buscar licitações salvas.' });
+        }
+
+        res.json(selectResults); // Retorna as licitações salvas
+      });
+    });
+  });
+
   return router;
 };
