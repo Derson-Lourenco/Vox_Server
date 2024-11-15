@@ -76,36 +76,48 @@
       });
 
       // Rota para salvar licitação
-      router.post('/salvar_licitacao', (req, res) => {
-        const { idUsuario, orgao, modalidade, valorPrevisto, data, link } = req.body;
+      // Rota para salvar licitação
+    router.post('/salvar_licitacao', (req, res) => {
+      const { idUsuario, orgao, modalidade, valorPrevisto, data, link } = req.body;
 
-        if (!idUsuario || !orgao || !modalidade || !valorPrevisto || !data || !link) {
-          return res.status(400).json({ error: 'Dados incompletos.' });
+      if (!idUsuario || !orgao || !modalidade || !valorPrevisto || !data || !link) {
+        return res.status(400).json({ error: 'Dados incompletos.' });
+      }
+
+      const query = `
+        INSERT INTO licitacoes_salvas (id_usuario, orgao, modalidade, valor_previsto, data, link)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `;
+
+      connection.query(query, [idUsuario, orgao, modalidade, valorPrevisto, data, link], (error, results) => {
+        if (error) {
+          console.error('Erro ao salvar licitação:', error);
+          return res.status(500).json({ error: 'Erro ao salvar licitação.' });
         }
 
-        const query = `
-          INSERT INTO licitacoes_salvas (id_usuario, orgao, modalidade, valor_previsto, data, link)
-          VALUES (?, ?, ?, ?, ?, ?)
-        `;
-
-        connection.query(query, [idUsuario, orgao, modalidade, valorPrevisto, data, link], (error, results) => {
-          if (error) {
-            console.error('Erro ao salvar licitação:', error);
-            return res.status(500).json({ error: 'Erro ao salvar licitação.' });
-          }
-
-          // Retorna todas as licitações salvas
-          const selectQuery = 'SELECT * FROM licitacoes_salvas WHERE id_usuario = ?';
-          connection.query(selectQuery, [idUsuario], (selectError, selectResults) => {
-            if (selectError) {
-              console.error('Erro ao buscar licitações salvas:', selectError);
-              return res.status(500).json({ error: 'Erro ao buscar licitações salvas.' });
-            }
-
-            res.json(selectResults); // Retorna as licitações salvas
-          });
-        });
+        res.status(200).json({ message: 'Licitação salva com sucesso.' });
       });
+    });
+
+    // Rota para buscar as licitações salvas
+    router.get('/licitações_salvas', (req, res) => {
+      const { idUsuario } = req.query;
+
+      if (!idUsuario) {
+        return res.status(400).json({ error: 'Parâmetro idUsuario é necessário.' });
+      }
+
+      const query = 'SELECT * FROM licitacoes_salvas WHERE id_usuario = ?';
+      connection.query(query, [idUsuario], (error, results) => {
+        if (error) {
+          console.error('Erro ao buscar licitações salvas:', error);
+          return res.status(500).json({ error: 'Erro ao buscar licitações salvas.' });
+        }
+
+        res.json(results); // Retorna as licitações salvas
+      });
+    });
+
 
       return router;
     };
