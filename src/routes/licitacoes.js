@@ -101,7 +101,9 @@
 
     // Rota para buscar as licitações salvas
     router.get('/salvas/:idUsuario', (req, res) => {
-      const { idUsuario } = req.query;
+      const { idUsuario } = req.params;  // Corrigido para acessar req.params
+
+      console.log('ID do usuário recebido:', idUsuario);  // Log para depuração
 
       if (!idUsuario) {
         return res.status(400).json({ error: 'Parâmetro idUsuario é necessário.' });
@@ -110,13 +112,15 @@
       const query = 'SELECT * FROM licitacoes_salvas WHERE id_usuario = ?';
       connection.query(query, [idUsuario], (error, results) => {
         if (error) {
-          console.error('Erro ao buscar licitações salvas:', error);
+          console.error('Erro ao buscar licitações salvas:', error);  // Log de erro detalhado
           return res.status(500).json({ error: 'Erro ao buscar licitações salvas.' });
         }
 
-        res.json(results); // Retorna as licitações salvas
+        console.log('Resultados encontrados:', results);  // Log dos resultados retornados
+        res.json(results);  // Retorna as licitações salvas
       });
     });
+
 
 
       return router;
