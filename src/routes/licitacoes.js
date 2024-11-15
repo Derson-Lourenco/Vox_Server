@@ -100,7 +100,7 @@
     });
 
     // Rota para buscar as licitações salvas
-    router.get('/licitações/salvas/:id_usuario', (req, res) => {
+    router.get('/salvas/:idUsuario', (req, res) => {
       const { idUsuario } = req.query;
 
       if (!idUsuario) {
