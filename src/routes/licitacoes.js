@@ -121,7 +121,30 @@
       });
     });
 
-
+    router.delete('/salvas/:id', (req, res) => {
+      const { id } = req.params;
+    
+      console.log('ID da licitação a ser excluída:', id);
+    
+      if (!id) {
+        return res.status(400).json({ error: 'Parâmetro id é necessário.' });
+      }
+    
+      const query = 'DELETE FROM licitacoes_salvas WHERE id = ?';
+      connection.query(query, [id], (error, results) => {
+        if (error) {
+          console.error('Erro ao excluir licitação salva:', error);
+          return res.status(500).json({ error: 'Erro ao excluir licitação salva.' });
+        }
+    
+        if (results.affectedRows === 0) {
+          return res.status(404).json({ message: 'Licitação não encontrada.' });
+        }
+    
+        res.json({ message: 'Licitação excluída com sucesso.' });
+      });
+    });
+    
 
       return router;
     };
