@@ -180,62 +180,64 @@ module.exports = connection => {
     });
   });
 
-  router.post('/upload-proposta/:userId', async (req, res) => {
-    const { userId, data, tipo } = req.body;
-  
-    try {
-      // Inserir cada linha do arquivo Excel na tabela PropostaReadequada
-      for (let row of data) {
-        const {
-          codProd,
-          itens,
-          descricao,
-          und,
-          qnt,
-          marca,
-          fabricante,
-          valor_unit,
-          valor_total
-        } = row;
+  router.post('/upload-proposta/:userId/:contratoId', async (req, res) => {
+  const { userId, contratoId, data, tipo } = req.body;
 
-        // Query para inserir na tabela PropostaReadequada
-        const sql = `
-          INSERT INTO PropostaReadequada (
-            user_id, codProd, itens, descricao, und, qnt, marca, fabricante, valor_unit, valor_total
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
+  try {
+    // Inserir cada linha do arquivo Excel na tabela PropostaReadequada
+    for (let row of data) {
+      const {
+        codProd,
+        itens,
+        descricao,
+        und,
+        qnt,
+        marca,
+        fabricante,
+        valor_unit,
+        valor_total
+      } = row;
 
-        const values = [
-          userId,
-          codProd,
-          itens,
-          descricao,
-          und,
-          qnt,
-          marca,
-          fabricante,
-          valor_unit,
-          valor_total
-        ];
+      // Query para inserir na tabela PropostaReadequada
+      const sql = `
+        INSERT INTO PropostaReadequada (
+          user_id, contrato_id, codProd, itens, descricao, und, qnt, marca, fabricante, valor_unit, valor_total
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
 
-        // Executa a query de inserção
-        await new Promise((resolve, reject) => {
-          connection.query(sql, values, (err, result) => {
-            if (err) {
-              console.error('Erro ao salvar proposta:', err);
-              reject(err);
-            } else {
-              resolve(result);
-            }
-          });
+      const values = [
+        userId,
+        contratoId,  // Agora estamos passando o contratoId
+        codProd,
+        itens,
+        descricao,
+        und,
+        qnt,
+        marca,
+        fabricante,
+        valor_unit,
+        valor_total
+      ];
+
+      // Executa a query de inserção
+      await new Promise((resolve, reject) => {
+        connection.query(sql, values, (err, result) => {
+          if (err) {
+            console.error('Erro ao salvar proposta:', err);
+            reject(err);
+          } else {
+            resolve(result);
+          }
         });
-      }
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Erro ao salvar dados:', error);
-      res.status(500).json({ success: false, message: 'Erro ao salvar dados' });
+      });
     }
-  });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao salvar dados:', error);
+    res.status(500).json({ success: false, message: 'Erro ao salvar dados' });
+  }
+});
+
   
   return router;
 };
