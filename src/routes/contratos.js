@@ -180,17 +180,56 @@ module.exports = connection => {
     });
   });
 
-  app.post('/upload-proposta', async (req, res) => {
+  router.post('/upload-proposta', async (req, res) => {
     const { userId, data, tipo } = req.body;
   
     try {
-      // Exemplo de lógica para salvar no banco
-      await PropostaReadequada.create({
-        userId,
-        tipo,
-        data: JSON.stringify(data),
-      });
-  
+      // Inserir cada linha do arquivo Excel na tabela PropostaReadequada
+      for (let row of data) {
+        const {
+          codProd,
+          itens,
+          descricao,
+          und,
+          qnt,
+          marca,
+          fabricante,
+          valor_unit,
+          valor_total
+        } = row;
+
+        // Query para inserir na tabela PropostaReadequada
+        const sql = `
+          INSERT INTO PropostaReadequada (
+            user_id, codProd, itens, descricao, und, qnt, marca, fabricante, valor_unit, valor_total
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const values = [
+          userId,
+          codProd,
+          itens,
+          descricao,
+          und,
+          qnt,
+          marca,
+          fabricante,
+          valor_unit,
+          valor_total
+        ];
+
+        // Executa a query de inserção
+        await new Promise((resolve, reject) => {
+          connection.query(sql, values, (err, result) => {
+            if (err) {
+              console.error('Erro ao salvar proposta:', err);
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          });
+        });
+      }
       res.json({ success: true });
     } catch (error) {
       console.error('Erro ao salvar dados:', error);
