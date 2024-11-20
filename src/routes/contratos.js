@@ -180,7 +180,7 @@ module.exports = connection => {
     });
   });
 
-  router.post('/upload-proposta', async (req, res) => {
+  router.post('/upload-proposta/:userId', async (req, res) => {
     const { userId, data, tipo } = req.body;
   
     try {
