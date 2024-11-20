@@ -180,6 +180,23 @@ module.exports = connection => {
     });
   });
 
+  app.post('/upload-proposta', async (req, res) => {
+    const { userId, data, tipo } = req.body;
+  
+    try {
+      // Exemplo de lógica para salvar no banco
+      await PropostaReadequada.create({
+        userId,
+        tipo,
+        data: JSON.stringify(data),
+      });
+  
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Erro ao salvar dados:', error);
+      res.status(500).json({ success: false, message: 'Erro ao salvar dados' });
+    }
+  });
   
   return router;
 };
