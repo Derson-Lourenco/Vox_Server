@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const findFreePort = require('find-free-port'); // Certifique-se de instalar essa biblioteca
 const createMunicipiosRouter = require('./routes/municipios'); // Importa a função de criação do router
 
-// Carregar variáveis de ambiente do arquivo .env
+// Carregar variáveis de ambiente do arquivo .envf 
 dotenv.config();
 
 const app = express();
